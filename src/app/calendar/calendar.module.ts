@@ -12,18 +12,19 @@ import {FormsModule} from "@angular/forms";
   declarations: [
       TimeSchedulerComponent,
       GridComponent,
+      GridItemComponent,
       CalendarHeaderComponent
   ],
     imports: [
         CommonModule,
         BrowserAnimationsModule,
         MaterialModule,
-        GridItemComponent,
         FormsModule,
     ],
   exports: [
       TimeSchedulerComponent,
       GridComponent,
+      GridItemComponent,
       CalendarHeaderComponent
   ]
 })

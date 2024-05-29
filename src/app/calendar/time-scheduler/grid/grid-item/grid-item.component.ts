@@ -1,14 +1,16 @@
 import {Component, Input} from '@angular/core';
 import {EventItem} from "../../../models";
+import {MatTooltip} from "@angular/material/tooltip";
 
 @Component({
   selector: 'calendar-grid-item',
-  standalone: true,
-  imports: [],
   templateUrl: './grid-item.component.html',
   styleUrl: './grid-item.component.scss'
 })
 export class GridItemComponent {
     @Input() eventItem!: EventItem;
     @Input() width!: number;
+    @Input() height!: number;
+    @Input() color!: string;
+    @Input() backgroundColor!: string;
 }

@@ -1,5 +1,14 @@
-<div class="gridItem" [style.width.px]="width">
+<div
+    class="gridItem"
+    [style.width.px]="width"
+    [style.max-width.px]="width"
+    [style.color]="color"
+    [style.background-color]="backgroundColor"
+    [style.height.px]="height"
+    [matTooltip]="eventItem.name"
+>
     @if (width >= 25) {
         {{eventItem.showedName}}
+    } @else {
     }
 </div>

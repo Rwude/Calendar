@@ -130,7 +130,6 @@ export class AppComponent {
   constructor() {
     for (let idx = 0; idx <= 15; idx += 1) {
       const sectionId = Math.floor(Math.random() * 6) - 1;
-      console.log(sectionId);
       if (sectionId !== -1) this.sections[sectionId].personIds.push(idx)
       this.persons.push({
         id: idx,
