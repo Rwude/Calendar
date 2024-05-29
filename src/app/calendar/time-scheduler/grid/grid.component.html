@@ -1,0 +1,24 @@
+<div style="position: relative; height: fit-content" #container>
+    <svg #dynamicGrid width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="position: relative; top: 0; left: 0">
+    </svg>
+    @if (gridPositions.length) {
+        @for (item of eventItems; track item.id; let idx = $index) {
+            <calendar-grid-item
+                cdkDrag
+                (cdkDragMoved)="dragMove($event, idx)"
+                (cdkDragEnded)="dragEnd($event, idx)"
+                [cdkDragFreeDragPosition]="dragPosition"
+                class="calendarItem"
+                [matTooltip]="item.name"
+                [eventItem]="item"
+                [width]="gridPositions[idx].width!"
+                [style.visibility]="gridPositions[idx].visible ? 'visible' : 'hidden'"
+                [style.height.px]="20"
+                [style.top.px]="gridPositions[idx].top"
+                [style.left.px]="gridPositions[idx].left"
+                [style.color]="item.color ? item.color : 'black'"
+                [style.background-color]="item.backgroundColor ? item.backgroundColor : 'blue'"
+            ></calendar-grid-item>
+        }
+    }
+</div>

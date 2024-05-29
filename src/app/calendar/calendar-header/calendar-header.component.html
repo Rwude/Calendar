@@ -1,0 +1,15 @@
+<div class="headerContainer">
+    <h2>{{title}}</h2>
+    <div class="headerPeriods">
+        <mat-button-toggle-group [(ngModel)]="periodIndex" (change)="switchPeriod($event)">
+            @for (period of periods; track period; let idx = $index) {
+                <mat-button-toggle [value]="idx">{{ period.name }}</mat-button-toggle>
+            }
+        </mat-button-toggle-group>
+    </div>
+    <div class="headerButtons">
+        <button mat-raised-button (click)="changeTimeFrame('today')">today</button>
+        <button mat-raised-button (click)="changeTimeFrame('prev')">prev</button>
+        <button mat-raised-button (click)="changeTimeFrame('next')">next</button>
+    </div>
+</div>
