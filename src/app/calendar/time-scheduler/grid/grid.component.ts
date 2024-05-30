@@ -233,7 +233,6 @@ export class GridComponent implements OnChanges {
         const newHeight = height[row] + position;
         for (let idx = 0; idx < height.length - 1; idx ++) {
             if(newHeight >= height[idx] && newHeight < height[idx + 1]) {
-                console.log(this.allRows[idx]);
                 return this.allRows[idx].personId
             }
         }
