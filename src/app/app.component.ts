@@ -138,7 +138,8 @@ export class AppComponent {
         groupId: sectionId
       })
     }
-    const colors: string[] = ['black', 'blue', 'red', 'darkmagenta', 'violet', 'green', 'violet', 'aqua', 'yellow', 'orange']
+    const colors: string[] = ['black', 'blue', 'red', 'darkmagenta', 'violet', 'green', 'violet', 'aqua', 'yellow', 'orange'];
+    const dragPrecisions: [number, EnumTime][] = [[1, EnumTime.Hour], [30, EnumTime.Minute], [1, EnumTime.Day], [2, EnumTime.Day], [1, EnumTime.Minute]];
       for (let idx = 4; idx <= 100; idx += 1) {
           const personId = Math.floor(Math.random() * 15);
           const colorIndex = Math.floor(Math.random() * 10);
@@ -149,6 +150,7 @@ export class AppComponent {
           start += (Math.floor(Math.random() * 24) - 12) * EnumTime.Hour;
           let end = start;
           end += Math.floor(Math.random() * 48) * EnumTime.Hour;
+          const dragPrecision = dragPrecisions[idx % 5]
           this.eventItems.push({
               id: idx,
               name: 'Event' + (idx + 1).toString(),
@@ -158,7 +160,7 @@ export class AppComponent {
               backgroundColor: backgroundColor,
               start: start,
               end: end,
-              dragPrecision: [1, EnumTime.Hour]
+              dragPrecision: dragPrecision
           });
       }
   }
