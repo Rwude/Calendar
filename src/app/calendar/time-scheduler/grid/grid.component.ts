@@ -97,7 +97,7 @@ export class GridComponent implements OnChanges {
         let position: GridPosition = {visible: true};
         let height: number = 0;
         for (let idx = 0; idx < this.allRows.length; idx ++) {
-            if (this.allRows[idx].personId === eventItem.personId) {
+            if (this.allRows[idx].personId === eventItem.childId) {
                 if (additionalHeight !== undefined) {
                     position.top = height + additionalHeight;
                     position.additionalHeight = additionalHeight;
@@ -143,23 +143,23 @@ export class GridComponent implements OnChanges {
         const dragPosition = event.distance;
         const item = this.eventItems[idx];
         const position = this.getItemPosition(item, idx);
-        this.gridPositions[idx].top! = this.getHeight(position.top!, dragPosition.y);
-        this.gridPositions[idx].left! = position.left! + dragPosition.x;
+        const {height} = this.getHeightAndId(position.top!, dragPosition.y,);
+        this.gridPositions[idx].top! = height;
+        this.gridPositions[idx].left! = position.left!;
         this.dragPosition = {x: 0, y: 0}
     }
 
     dragEnd(event: CdkDragEnd, idx: number) {
         const dragPosition = event.distance;
         const item = this.eventItems[idx];
-        const row = this.allRows.findIndex(r => r.personId === item.personId);
-        const oldPersonId = item.personId;
-        const newPersonId = this.getNewPersonId(dragPosition.y, row);
-        if (newPersonId !== undefined) {
-            this.eventItems[idx].personId = newPersonId;
-            this.eventItems[idx].personId = newPersonId;
-            this.getCollisions([oldPersonId, newPersonId]);
+        const position = this.getItemPosition(item, idx);
+        const oldChildId = item.childId;
+        const {childId} = this.getHeightAndId(position.top!, dragPosition.y);
+        if (childId !== undefined) {
+            this.eventItems[idx].childId = childId;
+            this.eventItems[idx].childId = childId;
+            this.getCollisions([oldChildId, childId]);
         } else {
-            const position = this.getItemPosition(item, idx);
             this.gridPositions[idx].top = position.top!;
             this.gridPositions[idx].left = position.left!;
         }
@@ -171,7 +171,7 @@ export class GridComponent implements OnChanges {
         const allChangedRows: {height: number, timeWindow: {start: number, end: number}[], eventItems: number[]}[][]= [];
         for (let id in personIds) {
             const personId = personIds[id];
-            const eventItems = this.eventItems.filter(item  => (item.personId === personId) && (this.isInTimeframe(item)));
+            const eventItems = this.eventItems.filter(item  => (item.childId === personId) && (this.isInTimeframe(item)));
             const row: {height: number, timeWindow: {start: number, end: number}[], eventItems: number[]}[] = [];
             eventItems.forEach(item => {
                 if (row.length === 0) {
@@ -206,7 +206,11 @@ export class GridComponent implements OnChanges {
         this.generateGrid();
     }
 
-    getHeight(oldPosition: number, delta: number) {
+    isInTimeframe(eventItem: EventItem) {
+        return (eventItem.start >= this.startEndValue.start && eventItem.start <= this.startEndValue.end) || (eventItem.end >= this.startEndValue.start && eventItem.end <= this.startEndValue.end) || (eventItem.start < this.startEndValue.start && eventItem.end > this.startEndValue.end);
+    }
+
+    getHeightAndId(oldPosition: number, delta: number) {
         const heightArray: number[] = [];
         let height = 0;
         this.allRows.forEach(r => {
@@ -214,29 +218,11 @@ export class GridComponent implements OnChanges {
             height += r.height;
         });
         for (let idx = 0; idx < heightArray.length; idx ++) {
-            if (oldPosition + delta >= heightArray[idx] && oldPosition + delta < heightArray[idx + 1]) return heightArray[idx]
-        }
-        return heightArray[heightArray.length - 1]
-    }
-
-    isInTimeframe(eventItem: EventItem) {
-        return (eventItem.start >= this.startEndValue.start && eventItem.start <= this.startEndValue.end) || (eventItem.end >= this.startEndValue.start && eventItem.end <= this.startEndValue.end) || (eventItem.start < this.startEndValue.start && eventItem.end > this.startEndValue.end);
-    }
-
-    getNewPersonId(position: number, row: number) {
-        const height: number[] = [];
-        let oldHeight = 0;
-        this.allRows.forEach(r => {
-            height.push(oldHeight);
-            oldHeight += r.height;
-        });
-        const newHeight = height[row] + position;
-        for (let idx = 0; idx < height.length - 1; idx ++) {
-            if(newHeight >= height[idx] && newHeight < height[idx + 1]) {
-                return this.allRows[idx].personId
+            if (oldPosition + delta >= heightArray[idx] && oldPosition + delta < heightArray[idx + 1]) {
+                return {childId: this.allRows[idx].personId, height: heightArray[idx]}
             }
         }
-        return this.allRows[height.length - 1].personId
+        return {childId: this.allRows[heightArray.length - 1].personId, height: heightArray[heightArray.length - 1]}
     }
 
     onCellEvent(type: string, row: number, col: number) {

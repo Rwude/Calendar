@@ -1,91 +1,93 @@
-<app-calendar-header
-    [periods]="periods"
-    [currentPeriod]="currentPeriod!"
-    [start]="start"
-    [utc]="utc"
-    [dayShort]="dayShort"
-    [monthShort]="monthShort"
-    (timeFrameEvent)="changeTimeFrame($event)"
-    (periodChangeEvent)="changePeriod($event)"
-> </app-calendar-header>
-<mat-drawer-container class="calendarContainer" autosize [ngClass]="{ 'container-closed': !showPersons }">
-    <mat-drawer #drawer class="example-sidenav" mode="side" disableClose="true" opened="true">
-        <div [style.height]="(timeFrameHeaders!.bigHeader.length !== 0 ? 80 : 40) + 'px'">
-            <button (click)="toggleSidebar()" mat-raised-button>click</button>
-        </div>
-        <div #scrollHorizontal>
-            @for (section of treeData; track section) {
-                <div  class="personOrSection" [style.background-color]="section.hovered ? 'grey' : ''" [style.height]="section.height + 'px'">
-                    @if (section.isPerson) {
-                        @if (section.picture) {
-                            <!--                        Here has to be the picture-->
-                        }
-                    } @else {
-                        <button class="toggleButton" mat-icon-button (click)="toggleSection(section.name)">
-                          @if (section.showChildren) {
-                            <mat-icon>keyboard_arrow_down</mat-icon>
-                          } @else {
-                            <mat-icon>keyboard_arrow_up</mat-icon>
-                          }
-                        </button>
-                    }
-                    @if (showPersons) {
-                        {{section.name}}
-                    }
-                </div>
-                @if (section.showChildren) {
-                    @for (person of section.children; track person) {
-                        <div class="personOrSection" [style.background-color]="person.hovered ? 'grey' : ''" [style.height]="person.height + 'px'">
-                            @if (person.picture) {
+<div style=" height: 100%">
+    <app-calendar-header
+        [periods]="periods"
+        [currentPeriod]="currentPeriod!"
+        [start]="start"
+        [utc]="utc"
+        [dayShort]="dayShort"
+        [monthShort]="monthShort"
+        (timeFrameEvent)="changeTimeFrame($event)"
+        (periodChangeEvent)="changePeriod($event)"
+    > </app-calendar-header>
+    <mat-drawer-container class="calendarContainer" autosize [ngClass]="{ 'container-closed': !showPersons }">
+        <mat-drawer #drawer class="example-sidenav" mode="side" disableClose="true" opened="true">
+            <div [style.height]="(timeFrameHeaders!.bigHeader.length !== 0 ? 80 : 40) + 'px'">
+                <button (click)="toggleSidebar()" mat-raised-button>click</button>
+            </div>
+            <div #scrollHorizontal>
+                @for (section of treeData; track section) {
+                    <div  class="personOrSection" [style.background-color]="section.hovered ? 'grey' : ''" [style.height]="section.height + 'px'">
+                        @if (section.isPerson) {
+                            @if (section.picture) {
                                 <!--                        Here has to be the picture-->
                             }
-                            @if (showPersons) {
-                                {{person.name}}
-                            }
-                        </div>
+                        } @else {
+                            <button class="toggleButton" mat-icon-button (click)="toggleSection(section.name)">
+                                @if (section.showChildren) {
+                                    <mat-icon>keyboard_arrow_down</mat-icon>
+                                } @else {
+                                    <mat-icon>keyboard_arrow_up</mat-icon>
+                                }
+                            </button>
+                        }
+                        @if (showPersons) {
+                            {{section.name}}
+                        }
+                    </div>
+                    @if (section.showChildren) {
+                        @for (person of section.children; track person) {
+                            <div class="personOrSection" [style.background-color]="person.hovered ? 'grey' : ''" [style.height]="person.height + 'px'">
+                                @if (person.picture) {
+                                    <!--                        Here has to be the picture-->
+                                }
+                                @if (showPersons) {
+                                    {{person.name}}
+                                }
+                            </div>
+                        }
                     }
                 }
-            }
+            </div>
+        </mat-drawer>
+        <div style="height: 100%; " #calendarContent>
+            <div class="timeTable" #scrollVertical>
+                <table class="time-sch-table" [style.width.px]="calendarWidth" [style.height.px]="(timeFrameHeaders!.bigHeader.length !== 0 ? 80 : 40)">
+                    <tr *ngIf="timeFrameHeaders?.bigHeader">
+                        @for ( bigHeader of timeFrameHeaders?.bigHeader; track bigHeader) {
+                            <td [colSpan]="bigHeader.smallHeaderIds.length" (click)="currentPeriod?.headerClickable && headerClicked(bigHeader.start, true)" [style.cursor]="currentPeriod?.headerClickable ? 'pointer' : 'auto'">
+                                {{  bigHeader.name  }}
+                            </td>
+                        }
+                    </tr>
+                    <tr *ngIf="timeFrameHeaders?.smallHeader">
+                        @for ( smallHeader of timeFrameHeaders?.smallHeader; track smallHeader) {
+                            <td [style.background-color]="smallHeader.hovered ? 'grey' : ''" (click)="currentPeriod?.headerClickable && headerClicked(smallHeader.start, false)" [style.cursor]="currentPeriod?.headerClickable ? 'pointer' : 'auto'">
+                                {{  smallHeader.name  }}
+                            </td>
+                        }
+                    </tr>
+                </table>
+                @if (currentMinute >= 0 && currentMinute * minuteWidth <= calendarWidth) {
+                    <span class="currentTime"
+                          [style.left.px]="currentMinute * minuteWidth - 5"
+                    >&#9660;</span>
+                }
+            </div>
+            <div class="calendarContent"  (scroll)="updateScroll(scrollHorizontal, scrollVertical)" [style.width.px]="calendarWidth !== 0 ? calendarWidth : ''">
+                @if (timeFrameHeaders) {
+                    <calendar-grid
+                        [columnWidth]="cellWidth"
+                        [totalColumns]="timeFrameHeaders.smallHeader.length"
+                        [allRows]="rowsData"
+                        [eventItems]="eventItems"
+                        [startEndValue]="startAndEnd"
+                        [minuteWidth]="minuteWidth"
+                        (cellEvent)="onCellClicked($event)"
+                        (allRowsChange)="onAllRowsChange($event)"
+                    ></calendar-grid>
+                }
+            </div>
         </div>
-    </mat-drawer>
-    <div style="height: 100%; overflow-y: hidden" #calendarContent>
-        <div class="timeTable" #scrollVertical>
-            <table class="time-sch-table" [style.width.px]="calendarWidth" [style.height.px]="(timeFrameHeaders!.bigHeader.length !== 0 ? 80 : 40)">
-                <tr *ngIf="timeFrameHeaders?.bigHeader">
-                    @for ( bigHeader of timeFrameHeaders?.bigHeader; track bigHeader) {
-                        <td [colSpan]="bigHeader.smallHeaderIds.length" (click)="currentPeriod?.headerClickable && headerClicked(bigHeader.start, true)" [style.cursor]="currentPeriod?.headerClickable ? 'pointer' : 'auto'">
-                            {{  bigHeader.name  }}
-                        </td>
-                    }
-                </tr>
-                <tr *ngIf="timeFrameHeaders?.smallHeader">
-                    @for ( smallHeader of timeFrameHeaders?.smallHeader; track smallHeader) {
-                        <td [style.background-color]="smallHeader.hovered ? 'grey' : ''" (click)="currentPeriod?.headerClickable && headerClicked(smallHeader.start, false)" [style.cursor]="currentPeriod?.headerClickable ? 'pointer' : 'auto'">
-                            {{  smallHeader.name  }}
-                        </td>
-                    }
-                </tr>
-            </table>
-            @if (currentMinute >= 0 && currentMinute * minuteWidth <= calendarWidth) {
-                <span class="currentTime"
-                      [style.left.px]="currentMinute * minuteWidth - 5"
-                >&#9660;</span>
-            }
-        </div>
-        <div class="calendarContent"  (scroll)="updateScroll(scrollHorizontal, scrollVertical)" [style.width.px]="calendarWidth !== 0 ? calendarWidth : ''">
-            @if (timeFrameHeaders) {
-                <calendar-grid
-                    [columnWidth]="cellWidth"
-                    [totalColumns]="timeFrameHeaders.smallHeader.length"
-                    [allRows]="rowsData"
-                    [eventItems]="eventItems"
-                    [startEndValue]="startAndEnd"
-                    [minuteWidth]="minuteWidth"
-                    (cellEvent)="onCellClicked($event)"
-                    (allRowsChange)="onAllRowsChange($event)"
-                ></calendar-grid>
-            }
-        </div>
-    </div>
-</mat-drawer-container>
+    </mat-drawer-container>
+</div>
 

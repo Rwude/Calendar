@@ -9,12 +9,10 @@ import {
     ViewChild
 } from '@angular/core';
 import {
-    BigTimeFrameHeader,
+    BigTimeFrameHeader, Child,
     EnumTime,
-    EnumTimeFrame, EventItem,
+    EnumTimeFrame, EventItem, Group,
     Period,
-    Person,
-    Section,
     SmallTimeFrameHeader,
     TimeFrameHeader,
     TreeData
@@ -29,8 +27,8 @@ import {TimeFunctionsService} from "../time-functions.service";
 export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     @ViewChild('calendarContent') calendarContent!: ElementRef<HTMLDivElement>;
 
-    @Input() persons!: Person[];
-    @Input() sections: Section[] = [];
+    @Input() persons!: Child[];
+    @Input() sections: Group[] = [];
     @Input() periods!: Period[];
     @Input() hiddenPeriods: Period[] = [];
     @Input() eventItems: EventItem[] = [];
@@ -106,14 +104,14 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
         const treeData: TreeData[] = [];
         this.sections.forEach(section => {
             let children: TreeData[] = [];
-            section.personIds.forEach(id => {
+            section.childIds.forEach(id => {
                 const person = this.persons.find(p => p.id === id)
-                children.push({name: person!.name, isPerson: true, personId: person!.id, hovered: false, height: 40})
+                children.push({name: person!.name, isPerson: true, childId: person!.id, hovered: false, height: 40})
             });
             treeData.push({name: section.name, isPerson: false, hovered: false, showChildren: true, children: children, height: 40});
         });
-        this.persons.filter(p => p.sectionId === -1).forEach(p => {
-            treeData.push({name: p.name, isPerson: true, personId: p!.id, hovered: false, height: 40});
+        this.persons.filter(p => p.groupId === -1).forEach(p => {
+            treeData.push({name: p.name, isPerson: true, childId: p!.id, hovered: false, height: 40});
         });
         return treeData;
     }
@@ -133,12 +131,12 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
         const rowsData: {row: number, height: number, color: string, personId?: number}[] = [];
         this.treeData.forEach((t, idx) => {
             const color = t.isPerson ? 'white' : 'lightgrey'; // todo: custom theming
-            const id = t.isPerson ? t.personId : undefined;
+            const id = t.isPerson ? t.childId : undefined;
             rowsData.push({row: idx, color: color, height: t.height, personId: id});
             if (t.children && t.showChildren) {
                 t.children.forEach(c => {
                     const color = c.isPerson ? 'white' : 'lightgrey'; // todo: custom theming
-                    const id = c.isPerson ? c.personId : undefined;
+                    const id = c.isPerson ? c.childId : undefined;
                     rowsData.push({row: idx, color: color, height: c.height, personId: id});
                 })
             }
@@ -319,13 +317,13 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
                 let i = 0;
                 this.treeData.forEach(t => {
                     if (i === event.row) {
-                        console.log(this.eventItems.filter(i => i.personId === t.personId));
+                        console.log(this.eventItems.filter(i => i.childId === t.childId));
                     }
                     i += 1;
                     if (t.children && t.showChildren) {
                         t.children?.forEach(child => {
                             if (i === event.row) {
-                                console.log(this.eventItems.filter(i => i.personId === child.personId));
+                                console.log(this.eventItems.filter(i => i.childId === child.childId));
                             }
                             i += 1;
                         })

@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {EnumTime, EnumTimeFrame, EventItem, Period, Person, Section} from "./calendar/models";
+import {Child, EnumTime, EnumTimeFrame, EventItem, Group, Period} from "./calendar/models";
 
 @Component({
   selector: 'app-root',
@@ -56,34 +56,34 @@ export class AppComponent {
       timeFramePeriod: [1, EnumTime.Day]
     },
   ];
-  sections: Section[] = [
+  sections: Group[] = [
     {
       id: 0,
-      name: 'Section 1',
-      personIds: []
+      name: 'Group 1',
+      childIds: []
     },
     {
       id: 1,
-      name: 'Section 2',
-      personIds: []
+      name: 'Group 2',
+      childIds: []
     },
     {
       id: 2,
-      name: 'Section 3',
-      personIds: []
+      name: 'Group 3',
+      childIds: []
     },
     {
       id: 3,
-      name: 'Section 4',
-      personIds: []
+      name: 'Group 4',
+      childIds: []
     },
     {
       id: 4,
-      name: 'Section 5',
-      personIds: []
+      name: 'Group 5',
+      childIds: []
     }
   ];
-  persons: Person[] = [];
+  persons: Child[] = [];
   eventItems: EventItem[] = [
     {
       id: 0,
@@ -93,7 +93,7 @@ export class AppComponent {
       end: Date.now() + 18000000,
       color: 'white',
       backgroundColor: 'blue',
-      personId: 2
+      childId: 2
     },
     {
       id: 1,
@@ -103,7 +103,7 @@ export class AppComponent {
       end: Date.now() + 123456789 + 86400000,
       color: 'black',
       backgroundColor: 'aqua',
-      personId: 1
+      childId: 1
     },
     {
       id: 2,
@@ -113,7 +113,7 @@ export class AppComponent {
       end: Date.now() + 123456789 + 86400000 + 6000000,
       color: 'white',
       backgroundColor: 'black',
-      personId: 1
+      childId: 1
     },
     {
       id: 3,
@@ -123,23 +123,23 @@ export class AppComponent {
       end: Date.now() + 18000000,
       color: 'white',
       backgroundColor: 'blue',
-      personId: 0
+      childId: 0
     }
   ];
 
   constructor() {
     for (let idx = 0; idx <= 15; idx += 1) {
       const sectionId = Math.floor(Math.random() * 6) - 1;
-      if (sectionId !== -1) this.sections[sectionId].personIds.push(idx)
+      if (sectionId !== -1) this.sections[sectionId].childIds.push(idx)
       this.persons.push({
         id: idx,
-        name: 'Person' + (idx + 1).toString(),
-        shortName: 'P' + (idx + 1).toString(),
-        sectionId: sectionId
+        name: 'Child' + (idx + 1).toString(),
+        shortName: 'C' + (idx + 1).toString(),
+        groupId: sectionId
       })
     }
     const colors: string[] = ['black', 'blue', 'red', 'darkmagenta', 'violet', 'green', 'violet', 'aqua', 'yellow', 'orange']
-      for (let idx = 4; idx <= 100; idx += 1) {
+      for (let idx = 4; idx <= 200; idx += 1) {
           const personId = Math.floor(Math.random() * 15);
           const colorIndex = Math.floor(Math.random() * 10);
           const backgroundColor = colors[colorIndex];
@@ -153,7 +153,7 @@ export class AppComponent {
               id: idx,
               name: 'Event' + (idx + 1).toString(),
               showedName: 'E' + (idx + 1).toString(),
-              personId: personId,
+              childId: personId,
               color: color,
               backgroundColor: backgroundColor,
               start: start,

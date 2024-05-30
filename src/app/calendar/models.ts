@@ -52,33 +52,33 @@ export interface EventItem {
   start: number;
   end: number;
   classes?: string;
-  sectionId?: number;
-  personId: number;
+  groupId?: number;
+  childId: number;
   color?: string;
   backgroundColor?: string;
   tooltip?: string;
 }
 
-export interface Section {
+export interface Group {
   id: number;
   name: string;
   tooltip?: string;
-  personIds: number[];
+  childIds: number[];
 }
 
-export interface Person {
+export interface Child {
   id: number;
   name: string;
   shortName?: string;
   picture?: string;
-  sectionId: number;
+  groupId: number;
 }
 
 export interface TreeData {
     name: string;
     picture?: string;
     isPerson: boolean;
-    personId?: number;
+    childId?: number;
     hovered: boolean;
     height: number;
     showChildren?: boolean
