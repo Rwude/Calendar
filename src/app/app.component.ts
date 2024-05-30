@@ -89,8 +89,8 @@ export class AppComponent {
       id: 0,
       name: 'Event 1',
       showedName: 'E1',
-      start: Date.now(),
-      end: Date.now() + 18000000,
+      start: new Date().setHours(0,0,0,0),
+      end: new Date().setHours(0,0,0,0) + EnumTime.Hour,
       color: 'white',
       backgroundColor: 'blue',
       childId: 2
@@ -139,7 +139,7 @@ export class AppComponent {
       })
     }
     const colors: string[] = ['black', 'blue', 'red', 'darkmagenta', 'violet', 'green', 'violet', 'aqua', 'yellow', 'orange']
-      for (let idx = 4; idx <= 200; idx += 1) {
+      for (let idx = 4; idx <= 100; idx += 1) {
           const personId = Math.floor(Math.random() * 15);
           const colorIndex = Math.floor(Math.random() * 10);
           const backgroundColor = colors[colorIndex];
@@ -157,7 +157,8 @@ export class AppComponent {
               color: color,
               backgroundColor: backgroundColor,
               start: start,
-              end: end
+              end: end,
+              dragPrecision: [1, EnumTime.Hour]
           });
       }
   }

@@ -75,6 +75,6 @@ export class TimeFunctionsService {
     }
 
     getMinutes(timeFrame: number) {
-        return Math.round(timeFrame / 60000);
+        return Math.floor(timeFrame / 60000);
     }
 }

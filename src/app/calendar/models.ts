@@ -56,6 +56,7 @@ export interface EventItem {
   childId: number;
   color?: string;
   backgroundColor?: string;
+  dragPrecision?: [number, EnumTime];
   tooltip?: string;
 }
 
@@ -90,5 +91,6 @@ export interface GridPosition {
     top?: number;
     left?: number;
     width?: number;
+    zIndex?: number;
     additionalHeight?: number;
 }

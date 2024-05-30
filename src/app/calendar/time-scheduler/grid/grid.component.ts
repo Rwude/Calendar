@@ -37,7 +37,7 @@ export class GridComponent implements OnChanges {
     totalHeight!: number;
 
     constructor(private cdr: ChangeDetectorRef, private timeFunctions: TimeFunctionsService) {
-        this.gridPositions = this.eventItems.map((item, idx) => this.getItemPosition(item, idx));
+        this.gridPositions = this.eventItems.map((item, idx) => this.getItemPosition(item, idx, 0, 0));
     }
 
     ngOnChanges(changes:SimpleChanges) {
@@ -93,7 +93,7 @@ export class GridComponent implements OnChanges {
         }
     }
 
-    getItemPosition(eventItem: EventItem, index: number, additionalHeight: number | undefined = undefined) {
+    getItemPosition(eventItem: EventItem, index: number, zIndex: number, pseudoTimeframe: number, additionalHeight: number | undefined = undefined) {
         let position: GridPosition = {visible: true};
         let height: number = 0;
         for (let idx = 0; idx < this.allRows.length; idx ++) {
@@ -114,54 +114,77 @@ export class GridComponent implements OnChanges {
                 height += this.allRows[idx].height;
             }
         }
+        const start = eventItem.start + pseudoTimeframe;
+        const end = eventItem.end + pseudoTimeframe;
         let diff: number;
-        if (eventItem.start < this.startEndValue.start || eventItem.start > this.startEndValue.end) {
+        if (start < this.startEndValue.start || start > this.startEndValue.end) {
             position.left = 0;
-        } else if (eventItem.start < this.startEndValue.end) {
-            diff = eventItem.start - this.startEndValue.start;
-            position.left = this.timeFunctions.getMinutes(diff) * this.minuteWidth;
+        } else if (start < this.startEndValue.end) {
+            diff = start - this.startEndValue.start;
+            position.left = Math.floor(this.timeFunctions.getMinutes(diff) * this.minuteWidth);
         }
-        if (eventItem.start >= this.startEndValue.start) {
-            if (eventItem.end <= this.startEndValue.end) {
-                diff = eventItem.end - eventItem.start;
+        if (start >= this.startEndValue.start) {
+            if (end <= this.startEndValue.end) {
+                diff = end - start;
             } else {
-                diff = this.startEndValue.end - eventItem.start;
+                diff = this.startEndValue.end - start;
             }
-        } else if (eventItem.end <= this.startEndValue.end) {
-            diff = eventItem.end - this.startEndValue.start;
+        } else if (end <= this.startEndValue.end) {
+            diff = end - this.startEndValue.start;
         } else {
             diff = this.startEndValue.end - this.startEndValue.start;
         }
-        position.width = this.timeFunctions.getMinutes(diff) * this.minuteWidth;
+        position.width = Math.floor(this.timeFunctions.getMinutes(diff) * this.minuteWidth);
         if (position.width < 0 || position.top === undefined) {
             position.visible = false
         }
+        position.zIndex = zIndex;
         return position
     }
 
     dragMove(event: CdkDragMove, idx: number) {
         const dragPosition = event.distance;
         const item = this.eventItems[idx];
-        const position = this.getItemPosition(item, idx);
+        let pseudoTimeframe: number;
+        if (!item.dragPrecision) {
+            pseudoTimeframe = 0
+        } else {
+            const minutes = Math.floor(dragPosition.x / this.minuteWidth);
+            const dragPrecisionInMinutes = this.timeFunctions.getMinutes(item.dragPrecision[0] * item.dragPrecision[1]);
+            const nbOfDrags = Math.floor(minutes / dragPrecisionInMinutes);
+            pseudoTimeframe = nbOfDrags * item.dragPrecision[0] * item.dragPrecision[1]
+        }
+
+        const position = this.getItemPosition(item, idx,10, pseudoTimeframe);
+        this.gridPositions[idx].width = position.width;
         const {height} = this.getHeightAndId(position.top!, dragPosition.y,);
         this.gridPositions[idx].top! = height;
         this.gridPositions[idx].left! = position.left!;
+        this.gridPositions[idx].zIndex = position.zIndex;
         this.dragPosition = {x: 0, y: 0}
     }
 
     dragEnd(event: CdkDragEnd, idx: number) {
         const dragPosition = event.distance;
         const item = this.eventItems[idx];
-        const position = this.getItemPosition(item, idx);
+        const position = this.getItemPosition(item, idx, 0, 0);
         const oldChildId = item.childId;
         const {childId} = this.getHeightAndId(position.top!, dragPosition.y);
         if (childId !== undefined) {
             this.eventItems[idx].childId = childId;
-            this.eventItems[idx].childId = childId;
+            this.gridPositions[idx].zIndex = position.zIndex;
+            if (item.dragPrecision) {
+                const minutes = Math.floor(dragPosition.x / this.minuteWidth);
+                const dragPrecisionInMinutes = this.timeFunctions.getMinutes(item.dragPrecision[0] * item.dragPrecision[1]);
+                const nbOfDrags = Math.floor(minutes / dragPrecisionInMinutes);
+                this.eventItems[idx].start += nbOfDrags * (item.dragPrecision[0] * item.dragPrecision[1]);
+                this.eventItems[idx].end += nbOfDrags * (item.dragPrecision[0] * item.dragPrecision[1]);
+            }
             this.getCollisions([oldChildId, childId]);
         } else {
             this.gridPositions[idx].top = position.top!;
             this.gridPositions[idx].left = position.left!;
+            this.gridPositions[idx].zIndex = position.zIndex;
         }
 
         this.dragPosition = {x: 0, y: 0}
@@ -178,7 +201,7 @@ export class GridComponent implements OnChanges {
                     row.push({height: 0, timeWindow: [{start: item.start, end: item.end}], eventItems: [item.id]});
                 } else {
                     const freeRow = row.findIndex(r => {
-                        return !r.timeWindow.some(tW => (item.start >= tW.start && item.start <= tW.end) || (item.end >= tW.start && item.end <= tW.end) || (item.start < tW.start && item.end > tW.end))
+                        return !r.timeWindow.some(tW => (item.start >= tW.start && item.start < tW.end) || (item.end > tW.start && item.end <= tW.end) || (item.start < tW.start && item.end > tW.end))
                     });
                     if (freeRow !== -1) {
                         row[freeRow].timeWindow.push({start: item.start, end: item.end});
@@ -197,9 +220,9 @@ export class GridComponent implements OnChanges {
             const includedRow = allChangedRows.find(row => row.some(r => r.eventItems.includes(item.id)))
             if (includedRow) {
                 const addedHeight = includedRow.find(r => r.eventItems.includes(item.id))!.height;
-                return this.getItemPosition(item, idx, addedHeight);
+                return this.getItemPosition(item, idx, 0, 0, addedHeight);
             } else {
-                return this.getItemPosition(item, idx);
+                return this.getItemPosition(item, idx, 0, 0);
             }
         });
         this.allRowsChange.emit(this.allRows);

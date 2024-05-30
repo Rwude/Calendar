@@ -1,6 +1,5 @@
 import {Component, Input} from '@angular/core';
 import {EventItem} from "../../../models";
-import {MatTooltip} from "@angular/material/tooltip";
 
 @Component({
   selector: 'calendar-grid-item',
