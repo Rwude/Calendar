@@ -37,7 +37,7 @@ export class GridComponent implements OnChanges {
     totalHeight!: number;
 
     constructor(private cdr: ChangeDetectorRef, private timeFunctions: TimeFunctionsService) {
-        this.gridPositions = this.eventItems.map(item => this.getItemPosition(item));
+        this.gridPositions = this.eventItems.map((item, idx) => this.getItemPosition(item, idx));
     }
 
     ngOnChanges(changes:SimpleChanges) {
@@ -93,12 +93,20 @@ export class GridComponent implements OnChanges {
         }
     }
 
-    getItemPosition(eventItem: EventItem, additionalHeight: number = 0) {
-        let position: {visible: boolean, top: number | undefined, left: number | undefined, width: number | undefined} = {visible: true, top: undefined, left: undefined, width: undefined};
+    getItemPosition(eventItem: EventItem, index: number, additionalHeight: number | undefined = undefined) {
+        let position: GridPosition = {visible: true};
         let height: number = 0;
         for (let idx = 0; idx < this.allRows.length; idx ++) {
             if (this.allRows[idx].personId === eventItem.personId) {
-                position.top = height + additionalHeight;
+                if (additionalHeight !== undefined) {
+                    position.top = height + additionalHeight;
+                    position.additionalHeight = additionalHeight;
+                } else {
+                    if (this.gridPositions[index]?.additionalHeight !== undefined) {
+                        position.top = height + this.gridPositions[index].additionalHeight!;
+                        position.additionalHeight = this.gridPositions[index].additionalHeight!
+                    }
+                }
             } else {
                 height += this.allRows[idx].height;
             }
@@ -131,7 +139,7 @@ export class GridComponent implements OnChanges {
     dragMove(event: CdkDragMove, idx: number) {
         const dragPosition = event.distance;
         const item = this.eventItems[idx];
-        const position = this.getItemPosition(item);
+        const position = this.getItemPosition(item, idx);
         this.gridPositions[idx].top! = this.getHeight(position.top!, dragPosition.y);
         this.gridPositions[idx].left! = position.left! + dragPosition.x;
         this.dragPosition = {x: 0, y: 0}
@@ -148,7 +156,7 @@ export class GridComponent implements OnChanges {
             this.eventItems[idx].personId = newPersonId;
             this.getCollisions([oldPersonId, newPersonId]);
         } else {
-            const position = this.getItemPosition(item);
+            const position = this.getItemPosition(item, idx);
             this.gridPositions[idx].top = position.top!;
             this.gridPositions[idx].left = position.left!;
         }
@@ -182,13 +190,13 @@ export class GridComponent implements OnChanges {
             const newHeight = row.length > 0 ? row[row.length - 1].height + 30 : 0;
             this.allRows.find(r => r.personId === personId)!.height = newHeight < 40 ? 40 : newHeight;
         }
-        this.gridPositions = this.eventItems.map(item => {
+        this.gridPositions = this.eventItems.map((item, idx) => {
             const includedRow = allChangedRows.find(row => row.some(r => r.eventItems.includes(item.id)))
             if (includedRow) {
                 const addedHeight = includedRow.find(r => r.eventItems.includes(item.id))!.height;
-                return this.getItemPosition(item, addedHeight);
+                return this.getItemPosition(item, idx, addedHeight);
             } else {
-                return this.getItemPosition(item)
+                return this.getItemPosition(item, idx);
             }
         });
         this.allRowsChange.emit(this.allRows);

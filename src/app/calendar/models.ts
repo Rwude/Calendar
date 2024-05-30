@@ -90,4 +90,5 @@ export interface GridPosition {
     top?: number;
     left?: number;
     width?: number;
+    additionalHeight?: number;
 }
