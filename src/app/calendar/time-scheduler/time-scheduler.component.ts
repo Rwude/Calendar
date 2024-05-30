@@ -315,6 +315,22 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
                 this.hoverCorrectTreeNode(event.type, event.row)
                 this.timeFrameHeaders!.smallHeader[event.col].hovered = false;
                 break;
+            case 'click':
+                let i = 0;
+                this.treeData.forEach(t => {
+                    if (i === event.row) {
+                        console.log(this.eventItems.filter(i => i.personId === t.personId));
+                    }
+                    i += 1;
+                    if (t.children && t.showChildren) {
+                        t.children?.forEach(child => {
+                            if (i === event.row) {
+                                console.log(this.eventItems.filter(i => i.personId === child.personId));
+                            }
+                            i += 1;
+                        })
+                    }
+                })
         }
         this.cdr.detectChanges()
     }

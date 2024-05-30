@@ -145,11 +145,10 @@ export class AppComponent {
           const backgroundColor = colors[colorIndex];
           const color = colorIndex <= 5 ? 'white' : 'black'
           let start = new Date().setHours(0,0,0,0);
-          start += Math.floor(Math.random() * 14) * EnumTime.Day;
+          start += Math.floor(Math.random() * 18) * EnumTime.Day;
           start += (Math.floor(Math.random() * 24) - 12) * EnumTime.Hour;
           let end = start;
-          end += Math.floor(Math.random() * 2) * EnumTime.Day;
-          end += (Math.floor(Math.random() * 24) - 12) * EnumTime.Hour;
+          end += Math.floor(Math.random() * 48) * EnumTime.Hour;
           this.eventItems.push({
               id: idx,
               name: 'Event' + (idx + 1).toString(),

@@ -105,6 +105,9 @@ export class GridComponent implements OnChanges {
                     if (this.gridPositions[index]?.additionalHeight !== undefined) {
                         position.top = height + this.gridPositions[index].additionalHeight!;
                         position.additionalHeight = this.gridPositions[index].additionalHeight!
+                    } else {
+                        position.top = height;
+                        position.additionalHeight = 0;
                     }
                 }
             } else {
@@ -229,7 +232,10 @@ export class GridComponent implements OnChanges {
         });
         const newHeight = height[row] + position;
         for (let idx = 0; idx < height.length - 1; idx ++) {
-            if(newHeight >= height[idx] && newHeight < height[idx + 1]) return this.allRows[idx].personId
+            if(newHeight >= height[idx] && newHeight < height[idx + 1]) {
+                console.log(this.allRows[idx]);
+                return this.allRows[idx].personId
+            }
         }
         return this.allRows[height.length - 1].personId
     }
