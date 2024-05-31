@@ -3,22 +3,24 @@
     </svg>
     @if (gridPositions.length) {
         @for (item of eventItems; track item.id; let idx = $index) {
-            <calendar-grid-item
-                cdkDrag
-                (cdkDragMoved)="dragMove($event, idx)"
-                (cdkDragEnded)="dragEnd($event, idx)"
-                [cdkDragFreeDragPosition]="dragPosition"
-                class="calendarItem"
-                [eventItem]="item"
-                [width]="gridPositions[idx].width!"
-                [height]="20"
-                [color]="item.color ? item.color : 'black'"
-                [backgroundColor]="item.backgroundColor ? item.backgroundColor : 'blue'"
-                [style.visibility]="gridPositions[idx].visible ? 'visible' : 'hidden'"
-                [style.top.px]="gridPositions[idx].top"
-                [style.left.px]="gridPositions[idx].left"
-                [style.z-index]="gridPositions[idx].zIndex"
-            ></calendar-grid-item>
+            @if (gridPositions[idx].width! > 0) {
+                <calendar-grid-item
+                    cdkDrag
+                    (cdkDragMoved)="dragMove($event, idx)"
+                    (cdkDragEnded)="dragEnd($event, idx)"
+                    [cdkDragFreeDragPosition]="dragPosition"
+                    class="calendarItem"
+                    [eventItem]="item"
+                    [width]="gridPositions[idx].width!"
+                    [height]="20"
+                    [color]="item.color ? item.color : 'black'"
+                    [backgroundColor]="item.backgroundColor ? item.backgroundColor : 'blue'"
+                    [style.visibility]="gridPositions[idx].visible ? 'visible' : 'hidden'"
+                    [style.top.px]="gridPositions[idx].top"
+                    [style.left.px]="gridPositions[idx].left"
+                    [style.z-index]="gridPositions[idx].zIndex"
+                ></calendar-grid-item>
+            }
         }
     }
 </div>

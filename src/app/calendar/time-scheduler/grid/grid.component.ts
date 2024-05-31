@@ -135,7 +135,7 @@ export class GridComponent implements OnChanges {
             diff = this.startEndValue.end - this.startEndValue.start;
         }
         position.width = Math.floor(this.timeFunctions.getMinutes(diff) * this.minuteWidth);
-        if (position.width < 0 || position.top === undefined) {
+        if (position.width <= 0 || position.top === undefined) {
             position.visible = false
         }
         position.zIndex = zIndex;

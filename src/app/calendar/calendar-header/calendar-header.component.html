@@ -8,8 +8,12 @@
         </mat-button-toggle-group>
     </div>
     <div class="headerButtons">
-        <button mat-raised-button (click)="changeTimeFrame('today')">today</button>
-        <button mat-raised-button (click)="changeTimeFrame('prev')">prev</button>
-        <button mat-raised-button (click)="changeTimeFrame('next')">next</button>
+        <button mat-button (click)="changeTimeFrame('today')">today</button>
+        <button class="iconButton" mat-fab (click)="changeTimeFrame('prev')" matTooltip="prev">
+            <mat-icon>keyboard_arrow_left</mat-icon>
+        </button>
+        <button class="iconButton" mat-fab (click)="changeTimeFrame('next')" matTooltip="next">
+            <mat-icon>keyboard_arrow_right</mat-icon>
+        </button>
     </div>
 </div>
