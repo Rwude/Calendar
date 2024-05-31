@@ -16,7 +16,7 @@
             </div>
             <div #scrollHorizontal>
                 @for (section of treeData; track section) {
-                    <div  class="personOrSection" [style.background-color]="section.hovered ? 'grey' : ''" [style.height]="section.height + 'px'">
+                    <div  class="personOrSection" [style.background-color]="section.hovered ? 'grey' : ''" [style.color]="section.hovered ? 'white' : ''" [style.height]="section.height + 'px'">
                         @if (section.isPerson) {
                             @if (section.picture) {
                                 <!--                        Here has to be the picture-->
@@ -36,7 +36,7 @@
                     </div>
                     @if (section.showChildren) {
                         @for (person of section.children; track person) {
-                            <div class="personOrSection" [style.background-color]="person.hovered ? 'grey' : ''" [style.height]="person.height + 'px'">
+                            <div class="personOrSection" [style.background-color]="person.hovered ? 'grey' : ''" [style.color]="person.hovered ? 'white' : ''"  [style.height]="person.height + 'px'">
                                 @if (person.picture) {
                                     <!--                        Here has to be the picture-->
                                 }
@@ -61,7 +61,7 @@
                     </tr>
                     <tr *ngIf="timeFrameHeaders?.smallHeader">
                         @for ( smallHeader of timeFrameHeaders?.smallHeader; track smallHeader) {
-                            <td [style.background-color]="smallHeader.hovered ? 'grey' : ''" (click)="currentPeriod?.headerClickable && headerClicked(smallHeader.start, false)" [style.cursor]="currentPeriod?.headerClickable ? 'pointer' : 'auto'">
+                            <td [style.background-color]="smallHeader.hovered ? 'grey' : ''" [style.color]="smallHeader.hovered ? 'white' : ''"  (click)="currentPeriod?.headerClickable && headerClicked(smallHeader.start, false)" [style.cursor]="currentPeriod?.headerClickable ? 'pointer' : 'auto'">
                                 {{  smallHeader.name  }}
                             </td>
                         }
