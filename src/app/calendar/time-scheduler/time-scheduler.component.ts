@@ -28,7 +28,7 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     @ViewChild('calendarContent') calendarContent!: ElementRef<HTMLDivElement>;
 
     @Input() persons!: Child[];
-    @Input() sections: Group[] = [];
+    @Input() groups: Group[] = [];
     @Input() periods!: Period[];
     @Input() hiddenPeriods: Period[] = [];
     @Input() eventItems: EventItem[] = [];
@@ -43,7 +43,7 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     showPersons: boolean = true;
     numberRows: number = 0;
     currentMinute: number = 0;
-    rowsData: {row: number, height: number, color: string, personId?: number}[] = [];
+    rowsData: {row: number, height: number, color: string, childId?: number, groupId?: number}[] = [];
     calendarWidth: number = 0;
     cellWidth: number = 0;
     minuteWidth: number = 0;
@@ -102,16 +102,16 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
 
     getTreeData() {
         const treeData: TreeData[] = [];
-        this.sections.forEach(section => {
+        this.groups.forEach(g => {
             let children: TreeData[] = [];
-            section.childIds.forEach(id => {
+            g.childIds.forEach(id => {
                 const person = this.persons.find(p => p.id === id)
-                children.push({name: person!.name, isPerson: true, childId: person!.id, hovered: false, height: 40})
+                children.push({name: person!.name, isChild: true, id: person!.id, hovered: false, height: 40})
             });
-            treeData.push({name: section.name, isPerson: false, hovered: false, showChildren: true, children: children, height: 40});
+            treeData.push({name: g.name, isChild: false, id: g.id, hovered: false, showChildren: true, children: children, height: 40});
         });
         this.persons.filter(p => p.groupId === -1).forEach(p => {
-            treeData.push({name: p.name, isPerson: true, childId: p!.id, hovered: false, height: 40});
+            treeData.push({name: p.name, isChild: true, id: p!.id, hovered: false, height: 40});
         });
         return treeData;
     }
@@ -128,16 +128,16 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     }
 
     getRowsData() {
-        const rowsData: {row: number, height: number, color: string, personId?: number}[] = [];
+        const rowsData: {row: number, height: number, color: string, childId?: number, groupId?: number}[] = [];
         this.treeData.forEach((t, idx) => {
-            const color = t.isPerson ? 'white' : 'lightgrey'; // todo: custom theming
-            const id = t.isPerson ? t.childId : undefined;
-            rowsData.push({row: idx, color: color, height: t.height, personId: id});
+            const color = t.isChild ? 'white' : 'lightgrey'; // todo: custom theming
+            const childId = t.isChild ? t.id : undefined;
+            const sectionId = t.isChild ? undefined : t.id
+            rowsData.push({row: idx, color: color, height: t.height, childId: childId, groupId: sectionId});
             if (t.children && t.showChildren) {
                 t.children.forEach(c => {
-                    const color = c.isPerson ? 'white' : 'lightgrey'; // todo: custom theming
-                    const id = c.isPerson ? c.childId : undefined;
-                    rowsData.push({row: idx, color: color, height: c.height, personId: id});
+                    const color = c.isChild ? 'white' : 'lightgrey'; // todo: custom theming
+                    rowsData.push({row: idx, color: color, height: c.height, childId: c.id});
                 })
             }
         });
@@ -317,13 +317,13 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
                 let i = 0;
                 this.treeData.forEach(t => {
                     if (i === event.row) {
-                        console.log(this.eventItems.filter(i => i.childId === t.childId));
+                        console.log(this.eventItems.filter(i => i.childId === t.id && t.isChild));
                     }
                     i += 1;
                     if (t.children && t.showChildren) {
                         t.children?.forEach(child => {
                             if (i === event.row) {
-                                console.log(this.eventItems.filter(i => i.childId === child.childId));
+                                console.log(this.eventItems.filter(i => i.childId === child.id && t.isChild));
                             }
                             i += 1;
                         })

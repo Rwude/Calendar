@@ -7,12 +7,14 @@ import {GridComponent} from "./time-scheduler/grid/grid.component";
 import {CalendarHeaderComponent} from "./calendar-header/calendar-header.component";
 import {GridItemComponent} from "./time-scheduler/grid/grid-item/grid-item.component";
 import {FormsModule} from "@angular/forms";
+import {GroupEventPreviewComponent} from "./time-scheduler/grid/group-event-preview/group-event-preview.component";
 
 @NgModule({
   declarations: [
       TimeSchedulerComponent,
       GridComponent,
       GridItemComponent,
+      GroupEventPreviewComponent,
       CalendarHeaderComponent
   ],
     imports: [
@@ -22,10 +24,7 @@ import {FormsModule} from "@angular/forms";
         FormsModule,
     ],
   exports: [
-      TimeSchedulerComponent,
-      GridComponent,
-      GridItemComponent,
-      CalendarHeaderComponent
+      TimeSchedulerComponent
   ]
 })
 export class CalendarModule { }

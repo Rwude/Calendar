@@ -78,8 +78,8 @@ export interface Child {
 export interface TreeData {
     name: string;
     picture?: string;
-    isPerson: boolean;
-    childId?: number;
+    isChild: boolean;
+    id: number;
     hovered: boolean;
     height: number;
     showChildren?: boolean
@@ -93,4 +93,11 @@ export interface GridPosition {
     width?: number;
     zIndex?: number;
     additionalHeight?: number;
+}
+
+export interface GroupPosition {
+    top?: number;
+    left?: number;
+    width?: number;
+    color: string;
 }

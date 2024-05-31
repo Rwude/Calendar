@@ -1,15 +1,13 @@
 import {
-    ChangeDetectorRef,
     Component,
     ElementRef,
     EventEmitter,
     Input,
     OnChanges,
     Output,
-    SimpleChanges,
     ViewChild
 } from '@angular/core';
-import {EventItem, GridPosition} from "../../models";
+import {EventItem, GridPosition, Group, GroupPosition} from "../../models";
 import {TimeFunctionsService} from "../../time-functions.service";
 import {CdkDragEnd, CdkDragMove} from "@angular/cdk/drag-drop";
 
@@ -22,28 +20,34 @@ export class GridComponent implements OnChanges {
     @ViewChild('dynamicGrid') dynamicGrid!: ElementRef<SVGElement>;
     @ViewChild('container', { static: false }) container!: ElementRef;
 
-    @Input() allRows: {row: number, height: number, color: string, personId?: number}[] = [];
+    @Input() allRows: {row: number, height: number, color: string, childId?: number, groupId?: number}[] = [];
     @Input() startEndValue!: {start: number, end: number};
     @Input() totalColumns = 50;
     @Input() columnWidth = 100;
     @Input() minuteWidth = 0;
     @Input() eventItems: EventItem[] = [];
+    @Input() groups: Group[] = [];
 
     @Output() cellEvent = new EventEmitter<{type: string, row: number, col: number}>();
-    @Output() allRowsChange = new EventEmitter<{row: number, height: number, color: string, personId?: number}[]>();
+    @Output() allRowsChange = new EventEmitter<{row: number, height: number, color: string, childId?: number, groupId?: number}[]>();
 
     gridPositions: GridPosition[] = [];
+    groupPositions: GroupPosition[][] = [];
     dragPosition = {x: 0, y: 0}
     totalHeight!: number;
 
-    constructor(private cdr: ChangeDetectorRef, private timeFunctions: TimeFunctionsService) {
+    constructor(private timeFunctions: TimeFunctionsService) {
         this.gridPositions = this.eventItems.map((item, idx) => this.getItemPosition(item, idx, 0, 0));
     }
 
-    ngOnChanges(changes:SimpleChanges) {
+    ngOnChanges() {
         this.allRows.forEach(r => r.height = 40);
-        const allPersons = this.allRows.map(r => r.personId).filter((value): value is number => value !== undefined);
-        this.getCollisions(allPersons)
+        const allPersons = this.allRows.map(r => r.childId).filter((value): value is number => value !== undefined);
+        this.getCollisions(allPersons);
+        this.groupPositions = Array.from({ length: this.groups.length }, () => []);
+        const allGroups = this.groups.map(g => g.id);
+        this.getGroupItems(allGroups);
+        this.generateGrid();
     }
 
     calculateTotalHeight() {
@@ -97,7 +101,7 @@ export class GridComponent implements OnChanges {
         let position: GridPosition = {visible: true};
         let height: number = 0;
         for (let idx = 0; idx < this.allRows.length; idx ++) {
-            if (this.allRows[idx].personId === eventItem.childId) {
+            if (this.allRows[idx].childId === eventItem.childId) {
                 if (additionalHeight !== undefined) {
                     position.top = height + additionalHeight;
                     position.additionalHeight = additionalHeight;
@@ -181,6 +185,7 @@ export class GridComponent implements OnChanges {
                 this.eventItems[idx].end += nbOfDrags * (item.dragPrecision[0] * item.dragPrecision[1]);
             }
             this.getCollisions([oldChildId, childId]);
+            this.generateGrid();
         } else {
             this.gridPositions[idx].top = position.top!;
             this.gridPositions[idx].left = position.left!;
@@ -214,7 +219,7 @@ export class GridComponent implements OnChanges {
             });
             allChangedRows.push(row);
             const newHeight = row.length > 0 ? row[row.length - 1].height + 30 : 0;
-            this.allRows.find(r => r.personId === personId)!.height = newHeight < 40 ? 40 : newHeight;
+            this.allRows.find(r => r.childId === personId)!.height = newHeight < 40 ? 40 : newHeight;
         }
         this.gridPositions = this.eventItems.map((item, idx) => {
             const includedRow = allChangedRows.find(row => row.some(r => r.eventItems.includes(item.id)))
@@ -226,11 +231,113 @@ export class GridComponent implements OnChanges {
             }
         });
         this.allRowsChange.emit(this.allRows);
-        this.generateGrid();
     }
 
     isInTimeframe(eventItem: EventItem) {
-        return (eventItem.start >= this.startEndValue.start && eventItem.start <= this.startEndValue.end) || (eventItem.end >= this.startEndValue.start && eventItem.end <= this.startEndValue.end) || (eventItem.start < this.startEndValue.start && eventItem.end > this.startEndValue.end);
+        return (eventItem.start >= this.startEndValue.start && eventItem.start < this.startEndValue.end) || (eventItem.end >= this.startEndValue.start && eventItem.end < this.startEndValue.end) || (eventItem.start < this.startEndValue.start && eventItem.end >= this.startEndValue.end);
+    }
+
+    getGroupItems(groupIds: number[]) {
+        for (let id in groupIds) {
+            const groupId = groupIds[id];
+            this.groupPositions[groupId] = []
+            let height: number = 0;
+            let initialHeight: number = 0;
+            for (let idx = 0; idx < this.allRows.length; idx ++) {
+                if (this.allRows[idx].groupId === groupId) {
+                    initialHeight = height;
+                } else {
+                    height += this.allRows[idx].height;
+                }
+            }
+            const rows = this.getGroupLoad(groupId);
+            rows.forEach(r => {
+                const timeframeHeight = initialHeight + r.height;
+                r.timeWindow.forEach(tW => {
+                    const start = tW.start;
+                    const end = tW.end;
+                    let diff: number;
+                    let left: number = 0;
+                    if (start < this.startEndValue.start || start > this.startEndValue.end) {
+                        left = 0;
+                    } else if (start < this.startEndValue.end) {
+                        diff = start - this.startEndValue.start;
+                        left = Math.floor(this.timeFunctions.getMinutes(diff) * this.minuteWidth);
+                    }
+                    if (start >= this.startEndValue.start) {
+                        if (end <= this.startEndValue.end) {
+                            diff = end - start;
+                        } else {
+                            diff = this.startEndValue.end - start;
+                        }
+                    } else if (end <= this.startEndValue.end) {
+                        diff = end - this.startEndValue.start;
+                    } else {
+                        diff = this.startEndValue.end - this.startEndValue.start;
+                    }
+                    const width = Math.floor(this.timeFunctions.getMinutes(diff) * this.minuteWidth);
+                    this.groupPositions[groupId].push({top: timeframeHeight, left: left, width: width, color: r.color})
+                });
+            });
+            const newHeight = rows.length > 0 ? rows[rows.length - 1].height + 10 : 0;
+            this.allRows.find(r => r.groupId === groupId)!.height = newHeight < 40 ? 40 : newHeight;
+            this.gridPositions.forEach(gP => {
+                if (gP.top! > initialHeight && newHeight > 40) {
+                    gP.top! += newHeight - 40;
+                }
+            });
+        }
+        this.allRowsChange.emit(this.allRows);
+    }
+
+
+
+    getGroupLoad(groupId: number) {
+        const eventItems = this.getChildEventsPerGroup(groupId).sort((a, b) => {
+            const aColor = a.backgroundColor ? a.backgroundColor : 'black';
+            const bColor = b.backgroundColor ? b.backgroundColor : 'black';
+            if (  aColor < bColor) {
+                return -1;
+            } else if (aColor > bColor) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+        const row: {height: number, timeWindow: {start: number, end: number}[], color: string}[] = [];
+        eventItems.forEach(item => {
+            const color = item.backgroundColor ? item.backgroundColor : 'black';
+            if (row.length === 0) {
+                row.push({height: 0, timeWindow: [{start: item.start, end: item.end}], color: color});
+            } else {
+                const rowIndex = row.findIndex(row => row.color === color);
+                if (rowIndex !== -1) {
+                    const timeframes = row[rowIndex].timeWindow.filter(tW => (tW.start <= item.start && tW.end > item.start) || (tW.start <= item.end && tW.end > item.end) || (tW.start > item.start && tW.end <= item.end));
+                    if (timeframes.length === 0) {
+                        row[rowIndex].timeWindow.push({start: item.start, end: item.end});
+                    } else if (timeframes.length === 1) {
+                        const index = row[rowIndex].timeWindow.findIndex(tW => tW.start === timeframes[0].start && tW.end === timeframes[0].end);
+                        row[rowIndex].timeWindow[index].start = Math.min(timeframes[0].start, item.start);
+                        row[rowIndex].timeWindow[index].end = Math.max(timeframes[0].end, item.end);
+                    } else {
+                        const index1 = row[rowIndex].timeWindow.findIndex(tW => tW.start === timeframes[0].start && tW.end === timeframes[0].end);
+                        const index2 = row[rowIndex].timeWindow.findIndex(tW => tW.start === timeframes[1].start && tW.end === timeframes[1].end);
+                        row[rowIndex].timeWindow.splice(Math.max(index1, index2), 1);
+                        row[rowIndex].timeWindow.splice(Math.min(index1, index2), 1);
+                        const start = Math.min(timeframes[0].start, timeframes[1].start, item.start);
+                        const end = Math.max(timeframes[0].end, timeframes[1].end, item.end);
+                        row[rowIndex].timeWindow.push({start: start, end: end});
+                    }
+                } else {
+                    row.push({height: row[row.length - 1].height + 5, timeWindow: [{start: item.start, end: item.end}], color: color})
+                }
+            }
+        });
+        return row;
+    }
+
+    getChildEventsPerGroup(groupId: number) {
+        return this.eventItems.filter(item => this.groups[groupId].childIds.includes(item.childId) && this.isInTimeframe(item));
     }
 
     getHeightAndId(oldPosition: number, delta: number) {
@@ -242,10 +349,10 @@ export class GridComponent implements OnChanges {
         });
         for (let idx = 0; idx < heightArray.length; idx ++) {
             if (oldPosition + delta >= heightArray[idx] && oldPosition + delta < heightArray[idx + 1]) {
-                return {childId: this.allRows[idx].personId, height: heightArray[idx]}
+                return {childId: this.allRows[idx].childId, height: heightArray[idx]}
             }
         }
-        return {childId: this.allRows[heightArray.length - 1].personId, height: heightArray[heightArray.length - 1]}
+        return {childId: this.allRows[heightArray.length - 1].childId, height: heightArray[heightArray.length - 1]}
     }
 
     onCellEvent(type: string, row: number, col: number) {

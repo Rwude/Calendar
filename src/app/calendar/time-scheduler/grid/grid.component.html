@@ -23,4 +23,18 @@
             }
         }
     }
+    @for (array of groupPositions; track array) {
+        @for (groupItem of array; track groupItem) {
+            <group-event-preview
+                class="groupItem"
+                [width]="groupItem.width!"
+                [height]="5"
+                [color]="groupItem.color"
+                [style.top.px]="groupItem.top!"
+                [style.left.px]="groupItem.left"
+            >
+            </group-event-preview>
+        }
+    }
+
 </div>
