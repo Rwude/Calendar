@@ -153,7 +153,7 @@ export class AppComponent {
           const dragPrecision = dragPrecisions[idx % 5]
           this.eventItems.push({
               id: idx,
-              name: 'Event' + (idx + 1).toString(),
+              name: 'Event ' + (idx + 1).toString(),
               showedName: 'E' + (idx + 1).toString(),
               childId: personId,
               color: color,
