@@ -185,6 +185,8 @@ export class GridComponent implements OnChanges {
                 this.eventItems[idx].end += nbOfDrags * (item.dragPrecision[0] * item.dragPrecision[1]);
             }
             this.getCollisions([oldChildId, childId]);
+            const groupIds = this.groups.filter(g => g.childIds.includes(oldChildId) || g.childIds.includes(childId)).map(g => g.id);
+            this.getGroupItems(groupIds);
             this.generateGrid();
         } else {
             this.gridPositions[idx].top = position.top!;
@@ -279,18 +281,17 @@ export class GridComponent implements OnChanges {
                     this.groupPositions[groupId].push({top: timeframeHeight, left: left, width: width, color: r.color})
                 });
             });
+            const oldHeight =  this.allRows.find(r => r.groupId === groupId)!.height;
             const newHeight = rows.length > 0 ? rows[rows.length - 1].height + 10 : 0;
             this.allRows.find(r => r.groupId === groupId)!.height = newHeight < 40 ? 40 : newHeight;
             this.gridPositions.forEach(gP => {
                 if (gP.top! > initialHeight && newHeight > 40) {
-                    gP.top! += newHeight - 40;
+                    gP.top! += newHeight - oldHeight;
                 }
             });
         }
         this.allRowsChange.emit(this.allRows);
     }
-
-
 
     getGroupLoad(groupId: number) {
         const eventItems = this.getChildEventsPerGroup(groupId).sort((a, b) => {
