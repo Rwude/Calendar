@@ -87,6 +87,7 @@ export interface TreeData {
 }
 
 export interface GridPosition {
+    eventIndex: number;
     visible: boolean;
     top?: number;
     left?: number;

@@ -43,10 +43,8 @@ export class GridComponent implements OnChanges {
     ngOnChanges() {
         this.allRows.forEach(r => r.height = 40);
         const allPersons = this.allRows.map(r => r.childId).filter((value): value is number => value !== undefined);
-        this.getCollisions(allPersons);
-        this.groupPositions = Array.from({ length: this.groups.length }, () => []);
         const allGroups = this.groups.map(g => g.id);
-        this.getGroupItems(allGroups);
+        this.updateItems(allPersons, allGroups);
         this.generateGrid();
     }
 
@@ -98,7 +96,7 @@ export class GridComponent implements OnChanges {
     }
 
     getItemPosition(eventItem: EventItem, index: number, zIndex: number, pseudoTimeframe: number, additionalHeight: number | undefined = undefined) {
-        let position: GridPosition = {visible: true};
+        let position: GridPosition = {eventIndex: index, visible: true};
         let height: number = 0;
         for (let idx = 0; idx < this.allRows.length; idx ++) {
             if (this.allRows[idx].childId === eventItem.childId) {
@@ -184,9 +182,8 @@ export class GridComponent implements OnChanges {
                 this.eventItems[idx].start += nbOfDrags * (item.dragPrecision[0] * item.dragPrecision[1]);
                 this.eventItems[idx].end += nbOfDrags * (item.dragPrecision[0] * item.dragPrecision[1]);
             }
-            this.getCollisions([oldChildId, childId]);
             const groupIds = this.groups.filter(g => g.childIds.includes(oldChildId) || g.childIds.includes(childId)).map(g => g.id);
-            this.getGroupItems(groupIds);
+            this.updateItems([oldChildId, childId], groupIds);
             this.generateGrid();
         } else {
             this.gridPositions[idx].top = position.top!;
@@ -197,11 +194,61 @@ export class GridComponent implements OnChanges {
         this.dragPosition = {x: 0, y: 0}
     }
 
-    getCollisions(personIds: number[]) {
-        const allChangedRows: {height: number, timeWindow: {start: number, end: number}[], eventItems: number[]}[][]= [];
-        for (let id in personIds) {
-            const personId = personIds[id];
-            const eventItems = this.eventItems.filter(item  => (item.childId === personId) && (this.isInTimeframe(item)));
+    updateItems(allChilds: number[], allGroups: number[]) {
+        const allChangedChildRows = this.getCollisions(allChilds);
+        const allChangedGroupRows =  this.getGroupLoad(allGroups);
+
+        let height: number = 0;
+        let additionalHeight: number = 0;
+        for (let idx = 0; idx < this.allRows.length; idx ++) {
+            if (this.allRows[idx].groupId !== undefined) {
+                const groupId = this.allRows[idx].groupId!;
+                if (allGroups.includes(groupId)) {
+                    this.groupPositions[groupId] = []
+                    const row = allChangedGroupRows.find(r => r.groupId === groupId)!;
+                    this.setGroupItemPositions(groupId, row.rows, height);
+                    const oldHeight =  this.allRows[idx].height;
+                    let newHeight = row.rows.length > 0 ? row.rows[row.rows.length - 1].height + 10 : 0;
+                    newHeight = newHeight < 40 ? 40 : newHeight
+                    this.allRows[idx].height = newHeight;
+                    additionalHeight += newHeight - oldHeight;
+                } else {
+                    this.groupPositions[groupId].forEach(gP => {
+                        gP.top! += additionalHeight;
+                    });
+                }
+            } else if (this.allRows[idx].childId !== undefined) {
+                const childId = this.allRows[idx].childId!;
+                if (allChilds.includes(childId)) {
+                    const row = allChangedChildRows.find(r => r.childId === childId)!;
+                    const oldHeight = this.allRows[idx].height;
+                    let newHeight = row.rows.length > 0 ? row.rows[row.rows.length - 1].height + 30 : 0;
+                    newHeight = newHeight < 40 ? 40 : newHeight;
+                    this.allRows[idx].height = newHeight;
+                    additionalHeight += newHeight - oldHeight;
+                }
+            }
+            height += this.allRows[idx].height;
+        }
+
+        this.gridPositions = this.eventItems.map((item, idx) => {
+            const row = allChangedChildRows.find(row => row.childId === item.childId);
+            if (row) {
+                const includedRow = row.rows.find(row => row.eventItems.includes(item.id));
+                if (includedRow) {
+                    const addedHeight = includedRow!.height;
+                    return this.getItemPosition(item, idx, 0, 0, addedHeight);
+                }
+            }
+            return this.getItemPosition(item, idx, 0, 0);
+        });
+    }
+
+    getCollisions(childIds: number[]) {
+        const allChangedRows: {childId: number, rows: {height: number, timeWindow: {start: number, end: number}[], eventItems: number[]}[]}[]= [];
+        for (let id in childIds) {
+            const childId = childIds[id];
+            const eventItems = this.eventItems.filter(item  => (item.childId === childId) && (this.isInTimeframe(item)));
             const row: {height: number, timeWindow: {start: number, end: number}[], eventItems: number[]}[] = [];
             eventItems.forEach(item => {
                 if (row.length === 0) {
@@ -219,126 +266,97 @@ export class GridComponent implements OnChanges {
                     }
                 }
             });
-            allChangedRows.push(row);
-            const newHeight = row.length > 0 ? row[row.length - 1].height + 30 : 0;
-            this.allRows.find(r => r.childId === personId)!.height = newHeight < 40 ? 40 : newHeight;
+            allChangedRows.push({childId: childId, rows: row});
         }
-        this.gridPositions = this.eventItems.map((item, idx) => {
-            const includedRow = allChangedRows.find(row => row.some(r => r.eventItems.includes(item.id)))
-            if (includedRow) {
-                const addedHeight = includedRow.find(r => r.eventItems.includes(item.id))!.height;
-                return this.getItemPosition(item, idx, 0, 0, addedHeight);
-            } else {
-                return this.getItemPosition(item, idx, 0, 0);
-            }
-        });
-        this.allRowsChange.emit(this.allRows);
+        return allChangedRows;
     }
 
-    isInTimeframe(eventItem: EventItem) {
-        return (eventItem.start >= this.startEndValue.start && eventItem.start < this.startEndValue.end) || (eventItem.end >= this.startEndValue.start && eventItem.end < this.startEndValue.end) || (eventItem.start < this.startEndValue.start && eventItem.end >= this.startEndValue.end);
-    }
-
-    getGroupItems(groupIds: number[]) {
-        for (let id in groupIds) {
-            const groupId = groupIds[id];
-            this.groupPositions[groupId] = []
-            let height: number = 0;
-            let initialHeight: number = 0;
-            for (let idx = 0; idx < this.allRows.length; idx ++) {
-                if (this.allRows[idx].groupId === groupId) {
-                    initialHeight = height;
+    getGroupLoad(groupIds: number[]) {
+        const allrows: {groupId: number, rows: {height: number, timeWindow: {start: number, end: number}[], color: string}[]}[] = [];
+        for (let idx = 0; idx < groupIds.length; idx += 1) {
+            const groupId = groupIds[idx]
+            const eventItems = this.getChildEventsPerGroup(groupId).sort((a, b) => {
+                const aColor = a.backgroundColor ? a.backgroundColor : 'black';
+                const bColor = b.backgroundColor ? b.backgroundColor : 'black';
+                if (  aColor < bColor) {
+                    return -1;
+                } else if (aColor > bColor) {
+                    return 1;
                 } else {
-                    height += this.allRows[idx].height;
+                    return 0;
                 }
-            }
-            const rows = this.getGroupLoad(groupId);
-            rows.forEach(r => {
-                const timeframeHeight = initialHeight + r.height;
-                r.timeWindow.forEach(tW => {
-                    const start = tW.start;
-                    const end = tW.end;
-                    let diff: number;
-                    let left: number = 0;
-                    if (start < this.startEndValue.start || start > this.startEndValue.end) {
-                        left = 0;
-                    } else if (start < this.startEndValue.end) {
-                        diff = start - this.startEndValue.start;
-                        left = Math.floor(this.timeFunctions.getMinutes(diff) * this.minuteWidth);
-                    }
-                    if (start >= this.startEndValue.start) {
-                        if (end <= this.startEndValue.end) {
-                            diff = end - start;
+            });
+            const row: {height: number, timeWindow: {start: number, end: number}[], color: string}[] = [];
+            eventItems.forEach(item => {
+                const color = item.backgroundColor ? item.backgroundColor : 'black';
+                if (row.length === 0) {
+                    row.push({height: 0, timeWindow: [{start: item.start, end: item.end}], color: color});
+                } else {
+                    const rowIndex = row.findIndex(row => row.color === color);
+                    if (rowIndex !== -1) {
+                        const timeframes = row[rowIndex].timeWindow.filter(tW => (tW.start <= item.start && tW.end > item.start) || (tW.start <= item.end && tW.end > item.end) || (tW.start > item.start && tW.end <= item.end));
+                        if (timeframes.length === 0) {
+                            row[rowIndex].timeWindow.push({start: item.start, end: item.end});
+                        } else if (timeframes.length === 1) {
+                            const index = row[rowIndex].timeWindow.findIndex(tW => tW.start === timeframes[0].start && tW.end === timeframes[0].end);
+                            row[rowIndex].timeWindow[index].start = Math.min(timeframes[0].start, item.start);
+                            row[rowIndex].timeWindow[index].end = Math.max(timeframes[0].end, item.end);
                         } else {
-                            diff = this.startEndValue.end - start;
+                            const index1 = row[rowIndex].timeWindow.findIndex(tW => tW.start === timeframes[0].start && tW.end === timeframes[0].end);
+                            const index2 = row[rowIndex].timeWindow.findIndex(tW => tW.start === timeframes[1].start && tW.end === timeframes[1].end);
+                            row[rowIndex].timeWindow.splice(Math.max(index1, index2), 1);
+                            row[rowIndex].timeWindow.splice(Math.min(index1, index2), 1);
+                            const start = Math.min(timeframes[0].start, timeframes[1].start, item.start);
+                            const end = Math.max(timeframes[0].end, timeframes[1].end, item.end);
+                            row[rowIndex].timeWindow.push({start: start, end: end});
                         }
-                    } else if (end <= this.startEndValue.end) {
-                        diff = end - this.startEndValue.start;
                     } else {
-                        diff = this.startEndValue.end - this.startEndValue.start;
+                        row.push({height: row[row.length - 1].height + 5, timeWindow: [{start: item.start, end: item.end}], color: color})
                     }
-                    const width = Math.floor(this.timeFunctions.getMinutes(diff) * this.minuteWidth);
-                    this.groupPositions[groupId].push({top: timeframeHeight, left: left, width: width, color: r.color})
-                });
-            });
-            const oldHeight =  this.allRows.find(r => r.groupId === groupId)!.height;
-            const newHeight = rows.length > 0 ? rows[rows.length - 1].height + 10 : 0;
-            this.allRows.find(r => r.groupId === groupId)!.height = newHeight < 40 ? 40 : newHeight;
-            this.gridPositions.forEach(gP => {
-                if (gP.top! > initialHeight && newHeight > 40) {
-                    gP.top! += newHeight - oldHeight;
                 }
             });
+            allrows.push({groupId: groupId, rows: row});
         }
-        this.allRowsChange.emit(this.allRows);
+        return allrows;
     }
 
-    getGroupLoad(groupId: number) {
-        const eventItems = this.getChildEventsPerGroup(groupId).sort((a, b) => {
-            const aColor = a.backgroundColor ? a.backgroundColor : 'black';
-            const bColor = b.backgroundColor ? b.backgroundColor : 'black';
-            if (  aColor < bColor) {
-                return -1;
-            } else if (aColor > bColor) {
-                return 1;
-            } else {
-                return 0;
-            }
-        });
-        const row: {height: number, timeWindow: {start: number, end: number}[], color: string}[] = [];
-        eventItems.forEach(item => {
-            const color = item.backgroundColor ? item.backgroundColor : 'black';
-            if (row.length === 0) {
-                row.push({height: 0, timeWindow: [{start: item.start, end: item.end}], color: color});
-            } else {
-                const rowIndex = row.findIndex(row => row.color === color);
-                if (rowIndex !== -1) {
-                    const timeframes = row[rowIndex].timeWindow.filter(tW => (tW.start <= item.start && tW.end > item.start) || (tW.start <= item.end && tW.end > item.end) || (tW.start > item.start && tW.end <= item.end));
-                    if (timeframes.length === 0) {
-                        row[rowIndex].timeWindow.push({start: item.start, end: item.end});
-                    } else if (timeframes.length === 1) {
-                        const index = row[rowIndex].timeWindow.findIndex(tW => tW.start === timeframes[0].start && tW.end === timeframes[0].end);
-                        row[rowIndex].timeWindow[index].start = Math.min(timeframes[0].start, item.start);
-                        row[rowIndex].timeWindow[index].end = Math.max(timeframes[0].end, item.end);
-                    } else {
-                        const index1 = row[rowIndex].timeWindow.findIndex(tW => tW.start === timeframes[0].start && tW.end === timeframes[0].end);
-                        const index2 = row[rowIndex].timeWindow.findIndex(tW => tW.start === timeframes[1].start && tW.end === timeframes[1].end);
-                        row[rowIndex].timeWindow.splice(Math.max(index1, index2), 1);
-                        row[rowIndex].timeWindow.splice(Math.min(index1, index2), 1);
-                        const start = Math.min(timeframes[0].start, timeframes[1].start, item.start);
-                        const end = Math.max(timeframes[0].end, timeframes[1].end, item.end);
-                        row[rowIndex].timeWindow.push({start: start, end: end});
-                    }
-                } else {
-                    row.push({height: row[row.length - 1].height + 5, timeWindow: [{start: item.start, end: item.end}], color: color})
+    setGroupItemPositions(groupId: number, rows: {height: number, timeWindow: {start: number, end: number}[], color: string}[], height: number){
+        rows.forEach(r => {
+            const timeframeHeight = height + r.height;
+            r.timeWindow.forEach(tW => {
+                const start = tW.start;
+                const end = tW.end;
+                let diff: number;
+                let left: number = 0;
+                if (start < this.startEndValue.start || start > this.startEndValue.end) {
+                    left = 0;
+                } else if (start < this.startEndValue.end) {
+                    diff = start - this.startEndValue.start;
+                    left = Math.floor(this.timeFunctions.getMinutes(diff) * this.minuteWidth);
                 }
-            }
+                if (start >= this.startEndValue.start) {
+                    if (end <= this.startEndValue.end) {
+                        diff = end - start;
+                    } else {
+                        diff = this.startEndValue.end - start;
+                    }
+                } else if (end <= this.startEndValue.end) {
+                    diff = end - this.startEndValue.start;
+                } else {
+                    diff = this.startEndValue.end - this.startEndValue.start;
+                }
+                const width = Math.floor(this.timeFunctions.getMinutes(diff) * this.minuteWidth);
+                this.groupPositions[groupId].push({top: timeframeHeight, left: left, width: width, color: r.color})
+            });
         });
-        return row;
     }
 
     getChildEventsPerGroup(groupId: number) {
         return this.eventItems.filter(item => this.groups[groupId].childIds.includes(item.childId) && this.isInTimeframe(item));
+    }
+
+    isInTimeframe(eventItem: EventItem) {
+        return (eventItem.start >= this.startEndValue.start && eventItem.start < this.startEndValue.end) || (eventItem.end >= this.startEndValue.start && eventItem.end < this.startEndValue.end) || (eventItem.start < this.startEndValue.start && eventItem.end >= this.startEndValue.end);
     }
 
     getHeightAndId(oldPosition: number, delta: number) {
