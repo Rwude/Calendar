@@ -248,7 +248,19 @@ export class GridComponent implements OnChanges {
         const allChangedRows: {childId: number, rows: {height: number, timeWindow: {start: number, end: number}[], eventItems: number[]}[]}[]= [];
         for (let id in childIds) {
             const childId = childIds[id];
-            const eventItems = this.eventItems.filter(item  => (item.childId === childId) && (this.isInTimeframe(item)));
+            let eventItems = this.eventItems.filter(item  => (item.childId === childId) && (this.isInTimeframe(item)));
+            eventItems.sort((a,b) => {
+                if (a.importance === undefined && b.importance === undefined) {
+                    return 0;
+                }
+                if (a.importance === undefined) {
+                    return 1;
+                }
+                if (b.importance === undefined) {
+                    return -1;
+                }
+                return a.importance - b.importance;
+            });
             const row: {height: number, timeWindow: {start: number, end: number}[], eventItems: number[]}[] = [];
             eventItems.forEach(item => {
                 if (row.length === 0) {

@@ -49,15 +49,14 @@ export interface EventItem {
   id: number;
   name: string;
   showedName: string;
+  importance?: number;
   start: number;
   end: number;
-  classes?: string;
   groupId?: number;
   childId: number;
   color?: string;
   backgroundColor?: string;
   dragPrecision?: [number, EnumTime];
-  tooltip?: string;
 }
 
 export interface Group {

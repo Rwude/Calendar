@@ -151,6 +151,7 @@ export class AppComponent {
           let end = start;
           end += Math.floor(Math.random() * 48) * EnumTime.Hour;
           const dragPrecision = dragPrecisions[idx % 5]
+          const importance: number = (idx + 1) % 5 === 0? 0 : 1;
           this.eventItems.push({
               id: idx,
               name: 'Event ' + (idx + 1).toString(),
@@ -160,7 +161,8 @@ export class AppComponent {
               backgroundColor: backgroundColor,
               start: start,
               end: end,
-              dragPrecision: dragPrecision
+              dragPrecision: dragPrecision,
+              importance: importance
           });
       }
   }
