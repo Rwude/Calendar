@@ -8,6 +8,8 @@ import {CalendarHeaderComponent} from "./calendar-header/calendar-header.compone
 import {GridItemComponent} from "./time-scheduler/grid/grid-item/grid-item.component";
 import {FormsModule} from "@angular/forms";
 import {GroupEventPreviewComponent} from "./time-scheduler/grid/group-event-preview/group-event-preview.component";
+import {CalendarTooltipComponent} from "./calendar-tooltip/calendar-tooltip.component";
+import {CalendarTooltipDirective} from "./calendar-tooltip/calendar-tooltip.directive";
 
 @NgModule({
   declarations: [
@@ -15,7 +17,9 @@ import {GroupEventPreviewComponent} from "./time-scheduler/grid/group-event-prev
       GridComponent,
       GridItemComponent,
       GroupEventPreviewComponent,
-      CalendarHeaderComponent
+      CalendarHeaderComponent,
+      CalendarTooltipComponent,
+      CalendarTooltipDirective
   ],
     imports: [
         CommonModule,

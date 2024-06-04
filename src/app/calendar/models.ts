@@ -1,7 +1,7 @@
 export interface Period {
   name: string;
   classes?: string;
-  timeFrame: [number, EnumTimeFrame];
+  timeFrame: [number, EnumTime];
   start?: number;
   headerClickable: boolean;
   timeFramePeriod: [number, EnumTime];
@@ -11,19 +11,14 @@ export interface Period {
 }
 
 export enum EnumTime {
-    Minute = 60000,
-    Hour = 3600000,
-    Day = 86400000,
-    Week = 604800000
-}
-
-export enum EnumTimeFrame {
+    Minute = 'minute',
     Hour = 'hour',
     Day = 'day',
     Week = 'week',
     Month = 'month',
     Year = 'year'
 }
+
 
 export interface TimeFrameHeader {
     bigHeader: BigTimeFrameHeader[];

@@ -10,8 +10,7 @@ import {
 } from '@angular/core';
 import {
     BigTimeFrameHeader, Child,
-    EnumTime,
-    EnumTimeFrame, EventItem, Group,
+    EnumTime, EventItem, Group,
     Period,
     SmallTimeFrameHeader,
     TimeFrameHeader,
@@ -39,14 +38,12 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
 
     timeFrameHeaders?: TimeFrameHeader;
     start: number | undefined = undefined;
-    currentPeriodTimeFrameSize: number = 0;
     currentPeriod?: Period;
     showPersons: boolean = true;
     numberRows: number = 0;
     currentMinute: number = 0;
     rowsData: {row: number, height: number, color: string, childId?: number, groupId?: number}[] = [];
     calendarWidth: number = 0;
-    calendarHeight: number = 0;
     cellWidth: number = 0;
     minuteWidth: number = 0;
     startAndEnd: {start: number, end: number} = {start: 0, end: 0};
@@ -66,7 +63,7 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     ngOnInit() {
         this.currentPeriod = this.periods[0];
         this.start = this.currentPeriod.start;
-        this.startAndEnd = {start: this.start!, end: this.start! + this.timeFunctions.getTimeFrameLength(this.currentPeriod, this.start!, this.utc)}
+        this.startAndEnd = {start: this.start!, end: this.start! + this.timeFunctions.getTimeFrameLength(this.currentPeriod.timeFrame, this.start!, this.utc)}
         this.treeData = this.getTreeData();
         this.numberRows = this.getVisibleTreeData();
         this.rowsData = this.getRowsData();
@@ -179,9 +176,8 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     }
 
     getTimeFrameHeaders(period: Period) {
-        this.currentPeriodTimeFrameSize = period.timeFramePeriod[0] * period.timeFramePeriod[1];
         const start = this.start ? this.start : Date.now();
-        const timeFrame = this.timeFunctions.getTimeFrameLength(period, this.start!, this.utc);
+        const timeFrame = this.timeFunctions.getTimeFrameLength(period.timeFrame, this.start!, this.utc);
         const end = start + timeFrame;
         let currentTime = start;
         const bigHeaders: BigTimeFrameHeader[] = [];
@@ -211,13 +207,13 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
                 hovered: false
             }
             smallHeaders.push(smallHeader);
-            currentTime += this.currentPeriodTimeFrameSize;
+            currentTime += this.timeFunctions.getTimeFrameLength(period.timeFramePeriod, currentTime, this.utc);
         }
         const timeFrameHeader: TimeFrameHeader = {bigHeader: bigHeaders, smallHeader: smallHeaders}
         return timeFrameHeader
     }
 
-    getTimeInfo(time: number, bigHeaderFormat: [number, EnumTimeFrame], smallHeaderFormat: EnumTime): {bigHeaderInfo: string | undefined, smallHeaderInfo: string} {
+    getTimeInfo(time: number, bigHeaderFormat: [number, EnumTime], smallHeaderFormat: EnumTime): {bigHeaderInfo: string | undefined, smallHeaderInfo: string} {
         let currentTimeSplit: any[];
         const timeDate = new Date(time);
         if (this.utc) {
@@ -229,19 +225,19 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
         let bigHeaderInfo: string | undefined;
         let smallHeaderInfo: string;
         switch(bigHeaderFormat[1]) {
-            case EnumTimeFrame.Hour:
+            case EnumTime.Hour:
                 bigHeaderInfo = undefined;
                 break;
-            case EnumTimeFrame.Day:
+            case EnumTime.Day:
                 bigHeaderInfo = bigHeaderFormat[0] > 1 ? this.monthShort[currentTimeSplit[1]] : undefined;
                 break;
-            case EnumTimeFrame.Week:
+            case EnumTime.Week:
                 bigHeaderInfo = this.monthShort[currentTimeSplit[1]];
                 break;
-            case EnumTimeFrame.Month:
+            case EnumTime.Month:
                 bigHeaderInfo = undefined;
                 break;
-            case EnumTimeFrame.Year:
+            case EnumTime.Year:
                 bigHeaderInfo = this.monthShort[currentTimeSplit[1]];
         }
         switch (smallHeaderFormat) {
@@ -298,7 +294,7 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     changePeriod(event: {periodIdx: number}) {
         this.currentPeriod = this.periods[event.periodIdx];
         this.start = this.currentPeriod.start;
-        this.startAndEnd = {start: this.start!, end: this.start! + this.timeFunctions.getTimeFrameLength(this.currentPeriod, this.start!, this.utc)};
+        this.startAndEnd = {start: this.start!, end: this.start! + this.timeFunctions.getTimeFrameLength(this.currentPeriod!.timeFrame, this.start!, this.utc)};
         this.timeFrameHeaders = this.getTimeFrameHeaders(this.currentPeriod);
         this.calendarContent.nativeElement.style.width = 'auto';
         this.calculateWidth(this.calendarContent.nativeElement.clientWidth);
@@ -347,10 +343,6 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
                 })
             }
         });
-        this.calendarHeight = 0
-        event.forEach(r => {
-            this.calendarHeight += r.height;
-        })
     }
 
     headerClicked(start: number, bigHeader: boolean) {
@@ -359,7 +351,7 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
             this.currentPeriod = this.hiddenPeriods[index];
             this.start = start;
         }
-        this.startAndEnd = {start: this.start!, end: this.start! + this.timeFunctions.getTimeFrameLength(this.currentPeriod!, this.start!, this.utc)};
+        this.startAndEnd = {start: this.start!, end: this.start! + this.timeFunctions.getTimeFrameLength(this.currentPeriod!.timeFrame, this.start!, this.utc)};
         this.timeFrameHeaders = this.getTimeFrameHeaders(this.currentPeriod!);
         this.calendarContent.nativeElement.style.width = 'auto';
         this.calculateWidth(this.calendarContent.nativeElement.clientWidth);
@@ -367,8 +359,8 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
 
     }
 
-    updateScroll(scrollHorizontal: HTMLElement, scrollVertical: HTMLElement) {
-        // scrollHorizontal.scrollTop = this.calendarContent.nativeElement.scrollTop;
-        // scrollVertical.scrollLeft = this.calendarContent.nativeElement.scrollLeft;
+    updateScroll(scrollMain: HTMLElement, scrollHorizontal: HTMLElement, scrollVertical: HTMLElement) {
+        scrollHorizontal.scrollTop = scrollMain.scrollTop;
+        scrollVertical.scrollLeft = scrollMain.scrollLeft;
     }
 }

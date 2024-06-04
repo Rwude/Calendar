@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {Child, EnumTime, EnumTimeFrame, EventItem, Group, Period} from "./calendar/models";
+import {Child, EnumTime, EventItem, Group, Period} from "./calendar/models";
 
 @Component({
   selector: 'app-root',
@@ -11,7 +11,7 @@ export class AppComponent {
     periods: Period[] = [
         {
             name: '18 Days',
-            timeFrame: [18, EnumTimeFrame.Day],
+            timeFrame: [18, EnumTime.Day],
             start: new Date().setHours(0, 0, 0, 0),
             headerClickable: true,
             timeFrameHeadersId: {bigHeader: 1, smallHeader: 0},
@@ -19,7 +19,7 @@ export class AppComponent {
         },
         {
             name: 'Month',
-            timeFrame: [1, EnumTimeFrame.Month],
+            timeFrame: [1, EnumTime.Month],
             start: new Date('2024-01-01').setHours(0,0,0,0),
             headerClickable: true,
             timeFrameHeadersId: {bigHeader: 1, smallHeader: 0},
@@ -27,7 +27,7 @@ export class AppComponent {
         },
         {
             name: 'Year',
-            timeFrame: [1, EnumTimeFrame.Year],
+            timeFrame: [1, EnumTime.Year],
             start: new Date('2024-01-01').setHours(0,0,0,0),
             width: 100,
             headerClickable: true,
@@ -38,20 +38,20 @@ export class AppComponent {
     headerPeriods: Period[] = [
         {
             name: 'Day',
-            timeFrame: [1, EnumTimeFrame.Day],
+            timeFrame: [1, EnumTime.Day],
             headerClickable: false,
             timeFramePeriod: [1, EnumTime.Hour]
         },
         {
             name: 'Month',
-            timeFrame: [1, EnumTimeFrame.Month],
+            timeFrame: [1, EnumTime.Month],
             headerClickable: true,
             timeFrameHeadersId: {bigHeader: 1, smallHeader: 0},
             timeFramePeriod: [1, EnumTime.Day]
         },
         {
             name: 'Week',
-            timeFrame: [1, EnumTimeFrame.Week],
+            timeFrame: [1, EnumTime.Week],
             headerClickable: true,
             timeFrameHeadersId: {bigHeader: 1, smallHeader: 0},
             timeFramePeriod: [1, EnumTime.Day]
@@ -91,7 +91,7 @@ export class AppComponent {
             name: 'Event 1',
             showedName: 'E1',
             start: new Date().setHours(0, 0, 0, 0),
-            end: new Date().setHours(0, 0, 0, 0) + EnumTime.Hour,
+            end: new Date().setHours(0, 0, 0, 0) + 3600000,
             color: 'white',
             backgroundColor: 'blue',
             childId: 2

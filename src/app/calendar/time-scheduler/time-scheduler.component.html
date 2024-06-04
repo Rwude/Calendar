@@ -1,4 +1,4 @@
-<div style="border: 5px solid black">
+<div style="height: 100%; border: 5px solid black;">
     <app-calendar-header
         [periods]="periods"
         [currentPeriod]="currentPeriod!"
@@ -73,7 +73,7 @@
                     >&#9660;</span>
                 }
             </div>
-            <div class="calendarContent"  (scroll)="updateScroll(scrollHorizontal, scrollVertical)" [style.width.px]="calendarWidth" [style.height.px]="calendarHeight">
+            <div class="calendarContent" #scrollMain (scroll)="updateScroll(scrollMain, scrollHorizontal, scrollVertical)" [style.width.px]="calendarWidth">
                 @if (timeFrameHeaders) {
                     <calendar-grid
                         [columnWidth]="cellWidth"

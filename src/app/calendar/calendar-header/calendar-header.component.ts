@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
-import {EnumTimeFrame, Period} from "../models";
+import {EnumTime, Period} from "../models";
 import {TimeFunctionsService} from "../time-functions.service";
 
 @Component({
@@ -29,7 +29,7 @@ export class CalendarHeaderComponent implements OnChanges, OnInit{
 
     ngOnInit() {
         this.period = this.currentPeriod;
-        this.end = this.start! + this.timeFunctions.getTimeFrameLength(this.period, this.start!, this.utc) - this.period.timeFramePeriod[1] * this.period.timeFramePeriod[0];
+        this.end = this.start! + this.timeFunctions.getTimeFrameLength(this.period.timeFrame, this.start!, this.utc) - this.timeFunctions.getMilliseconds(this.period.timeFramePeriod[1]) * this.period.timeFramePeriod[0];
         this.title = this.getTitle()
     }
 
@@ -38,12 +38,12 @@ export class CalendarHeaderComponent implements OnChanges, OnInit{
             this.periodIndex = 0;
             this.period = this.periods[0];
             this.start = this.period.start || new Date().setHours(0,0,0,0);
-            this.end = this.start + this.timeFunctions.getTimeFrameLength(this.period, this.start, this.utc) - this.period.timeFramePeriod[1] * this.period.timeFramePeriod[0];
+            this.end = this.start + this.timeFunctions.getTimeFrameLength(this.period.timeFrame, this.start, this.utc) - this.timeFunctions.getMilliseconds(this.period.timeFramePeriod[1]) * this.period.timeFramePeriod[0];
             this.title = this.getTitle();
         } else if (changes['currentPeriod'] || changes['start']) {
             this.period = this.currentPeriod;
             this.periodIndex = this.periods.findIndex(p => p.timeFrame[0] === this.currentPeriod.timeFrame[0] && p.timeFrame[1] === this.currentPeriod.timeFrame[1]);
-            this.end = this.start! + this.timeFunctions.getTimeFrameLength(this.period, this.start!, this.utc) - this.period.timeFramePeriod[1] * this.period.timeFramePeriod[0];
+            this.end = this.start! + this.timeFunctions.getTimeFrameLength(this.period.timeFrame, this.start!, this.utc) - this.timeFunctions.getMilliseconds(this.period.timeFramePeriod[1]) * this.period.timeFramePeriod[0];
             this.title = this.getTitle()
         }
     }
@@ -68,14 +68,14 @@ export class CalendarHeaderComponent implements OnChanges, OnInit{
         const sameMonth = startInfo[1] === endInfo[1];
         let title: string = '';
         switch (this.period?.timeFrame[1]) {
-            case EnumTimeFrame.Year:
+            case EnumTime.Year:
                 if (!yearBehind) {
                     title += startInfo[0] + ' - ' + endInfo[0]
                 } else {
                     title += startInfo[0]
                 }
                 break;
-            case EnumTimeFrame.Month:
+            case EnumTime.Month:
                 title += startInfo[1];
                 if (!yearBehind) title += ' ' + startInfo[0];
                 if (!sameMonth) {
@@ -83,14 +83,14 @@ export class CalendarHeaderComponent implements OnChanges, OnInit{
                 }
                 title += yearBehind ? ', ' + startInfo[0] : ' ' + endInfo[0];
                 break;
-            case EnumTimeFrame.Week:
+            case EnumTime.Week:
                 title += startInfo[1] + ' ' + startInfo[2];
                 if (!yearBehind) title += ', ' + startInfo[0];
                 title += ' - '
                 if(!sameMonth) title += endInfo[1] + ' '
                 title += endInfo[2] + ', ' + endInfo[0]
                 break;
-            case EnumTimeFrame.Day:
+            case EnumTime.Day:
                 if (this.period!.timeFrame[0] > 1) {
                     title += startInfo[1] + ' ' + startInfo[2];
                     if (!yearBehind) title += ', ' + startInfo[0];
@@ -111,7 +111,7 @@ export class CalendarHeaderComponent implements OnChanges, OnInit{
         this.periodIndex = event.value
         this.period = this.periods[this.periodIndex!];
         this.start = this.period!.start || new Date().setHours(0,0,0,0);
-        this.end = this.start + this.timeFunctions.getTimeFrameLength(this.period!, this.start, this.utc) - this.period!.timeFramePeriod[1] * this.period!.timeFramePeriod[0];
+        this.end = this.start + this.timeFunctions.getTimeFrameLength(this.period!.timeFrame, this.start, this.utc) - this.timeFunctions.getMilliseconds(this.period.timeFramePeriod[1]) * this.period.timeFramePeriod[0];
         this.title = this.getTitle()
 
         this.periodChangeEvent.emit({periodIdx: this.periodIndex!});
@@ -119,19 +119,19 @@ export class CalendarHeaderComponent implements OnChanges, OnInit{
 
     changeTimeFrame(button: string) {
         if (button === 'next') {
-            this.start = this.end + this.period!.timeFramePeriod[1] * this.period!.timeFramePeriod[0];
-            this.end = this.start + this.timeFunctions.getTimeFrameLength(this.period!, this.start, this.utc) - this.period!.timeFramePeriod[1] * this.period!.timeFramePeriod[0];
+            this.start = this.end + this.timeFunctions.getMilliseconds(this.period!.timeFramePeriod[1]) * this.period!.timeFramePeriod[0];
+            this.end = this.start + this.timeFunctions.getTimeFrameLength(this.period!.timeFrame, this.start, this.utc) - this.timeFunctions.getMilliseconds(this.period!.timeFramePeriod[1]) * this.period!.timeFramePeriod[0];
             this.title = this.getTitle();
         } else if (button === 'prev') {
-            this.end = this.start! - this.period!.timeFramePeriod[1] * this.period!.timeFramePeriod[0];
-            this.start = this.end - this.timeFunctions.getTimeFrameLength(this.period!, this.start!, this.utc, true) + this.period!.timeFramePeriod[1] * this.period!.timeFramePeriod[0];
+            this.end = this.start! - this.timeFunctions.getMilliseconds(this.period!.timeFramePeriod[1]) * this.period!.timeFramePeriod[0];
+            this.start = this.end - this.timeFunctions.getTimeFrameLength(this.period!.timeFrame, this.start!, this.utc, true) + this.timeFunctions.getMilliseconds(this.period!.timeFramePeriod[1]) * this.period!.timeFramePeriod[0];
             this.title = this.getTitle();
         } else {
             this.start = new Date().setHours(0,0,0,0);
-            this.end = this.start + this.timeFunctions.getTimeFrameLength(this.period!, this.start, this.utc) - this.period!.timeFramePeriod[1] * this.period!.timeFramePeriod[0];
+            this.end = this.start + this.timeFunctions.getTimeFrameLength(this.period!.timeFrame, this.start, this.utc) - this.timeFunctions.getMilliseconds(this.period!.timeFramePeriod[1]) * this.period!.timeFramePeriod[0];
             this.title = this.getTitle();
         }
 
-        this.timeFrameEvent.emit({start: this.start, end: this.end + this.period!.timeFramePeriod[1] * this.period!.timeFramePeriod[0]})
+        this.timeFrameEvent.emit({start: this.start, end: this.end + this.timeFunctions.getMilliseconds(this.period!.timeFramePeriod[1]) * this.period!.timeFramePeriod[0]})
     }
 }

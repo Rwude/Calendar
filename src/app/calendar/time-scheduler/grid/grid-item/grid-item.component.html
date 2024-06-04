@@ -1,12 +1,18 @@
 <div
     class="gridItem"
-    [style.width.px]="width >= 32 ? width - 7 : width"
+    [style.width.px]="width >= 32 ? width - 6 : width"
     [style.max-width.px]="width"
     [style.padding-left.px]="width >= 32 ? 5 : 0"
     [style.color]="color"
     [style.border-color]="color !== 'white' ? color : 'black' "
     [style.background-color]="backgroundColor"
     [style.height.px]="height - 1"
+    calendarTooltip
+    [eventItem]="eventItem"
+    placement="top"
+    [delay]="300"
+    [left]="width / 2"
+    [top]="20"
 >
     @if (width >= 32) {
         {{eventItem.showedName}}

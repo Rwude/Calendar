@@ -28,6 +28,7 @@ export class GridComponent implements OnChanges {
     @Input() eventItems: EventItem[] = [];
     @Input() changePersons: boolean = true;
     @Input() groups: Group[] = [];
+    @Input() utc: boolean = false;
 
     @Output() cellEvent = new EventEmitter<{type: string, row: number, col: number}>();
     @Output() allRowsChange = new EventEmitter<{row: number, height: number, color: string, childId?: number, groupId?: number}[]>();
@@ -152,9 +153,9 @@ export class GridComponent implements OnChanges {
             pseudoTimeframe = 0
         } else {
             const minutes = Math.floor(dragPosition.x / this.minuteWidth);
-            const dragPrecisionInMinutes = this.timeFunctions.getMinutes(item.dragPrecision[0] * item.dragPrecision[1]);
+            const dragPrecisionInMinutes = this.timeFunctions.getNumberOfMinutes(item.dragPrecision, item.start, this.utc);
             const nbOfDrags = minutes / dragPrecisionInMinutes;
-            pseudoTimeframe = nbOfDrags * item.dragPrecision[0] * item.dragPrecision[1]
+            pseudoTimeframe = nbOfDrags * this.timeFunctions.getTimeFrameLength(item.dragPrecision, item.start, this.utc)
         }
 
         const position = this.getItemPosition(item, idx,10, pseudoTimeframe);
@@ -177,10 +178,11 @@ export class GridComponent implements OnChanges {
             this.gridPositions[idx].zIndex = position.zIndex;
             if (item.dragPrecision) {
                 const minutes = Math.floor(dragPosition.x / this.minuteWidth);
-                const dragPrecisionInMinutes = this.timeFunctions.getMinutes(item.dragPrecision[0] * item.dragPrecision[1]);
+                const dragPrecisionInMinutes =  this.timeFunctions.getNumberOfMinutes(item.dragPrecision, item.start, this.utc);
                 const nbOfDrags = Math.floor(minutes / dragPrecisionInMinutes);
-                this.eventItems[idx].start += nbOfDrags * (item.dragPrecision[0] * item.dragPrecision[1]);
-                this.eventItems[idx].end += nbOfDrags * (item.dragPrecision[0] * item.dragPrecision[1]);
+                const timeFrameLength = this.timeFunctions.getTimeFrameLength(item.dragPrecision, item.start, this.utc);
+                this.eventItems[idx].start += nbOfDrags * timeFrameLength
+                this.eventItems[idx].end += nbOfDrags * timeFrameLength;
             }
             const groupIds = this.groups.filter(g => g.childIds.includes(oldChildId) || g.childIds.includes(childId)).map(g => g.id);
             this.updateItems([oldChildId, childId], groupIds);
