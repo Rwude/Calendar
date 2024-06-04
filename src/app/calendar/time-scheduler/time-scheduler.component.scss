@@ -20,8 +20,7 @@ $menu-width-closed: 70px;
     }
 
     .calendarContent {
-    // transform: translateX(200px);
-        height: 100%;
+        margin-top: 0;
         margin-left: var($menu-width-open) !important;
         margin-bottom: 0;
         transition: all 0.3s ease-in-out !important;
@@ -40,6 +39,7 @@ $menu-width-closed: 70px;
 }
 table {
     table-layout: fixed;
+    margin-bottom: 0;
 
     td {
         text-align: center;

@@ -33,6 +33,7 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     @Input() hiddenPeriods: Period[] = [];
     @Input() eventItems: EventItem[] = [];
     @Input() utc: boolean = false;
+    @Input() changePersons: boolean = true;
     @Input() dayShort: string[] = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
     @Input() monthShort: string[] = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -45,6 +46,7 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     currentMinute: number = 0;
     rowsData: {row: number, height: number, color: string, childId?: number, groupId?: number}[] = [];
     calendarWidth: number = 0;
+    calendarHeight: number = 0;
     cellWidth: number = 0;
     minuteWidth: number = 0;
     startAndEnd: {start: number, end: number} = {start: 0, end: 0};
@@ -345,6 +347,10 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
                 })
             }
         });
+        this.calendarHeight = 0
+        event.forEach(r => {
+            this.calendarHeight += r.height;
+        })
     }
 
     headerClicked(start: number, bigHeader: boolean) {
@@ -362,7 +368,7 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     }
 
     updateScroll(scrollHorizontal: HTMLElement, scrollVertical: HTMLElement) {
-        scrollHorizontal.scrollTop = this.calendarContent.nativeElement.scrollTop;
-        scrollVertical.scrollLeft = this.calendarContent.nativeElement.scrollLeft;
+        // scrollHorizontal.scrollTop = this.calendarContent.nativeElement.scrollTop;
+        // scrollVertical.scrollLeft = this.calendarContent.nativeElement.scrollLeft;
     }
 }

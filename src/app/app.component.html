@@ -1,8 +1,14 @@
-<cern-time-scheduler
-  [persons]="persons"
-  [groups]="sections"
-  [periods]="periods"
-  [hiddenPeriods]="headerPeriods"
-  [eventItems]="eventItems"
-  [utc]="false"
-></cern-time-scheduler>
+<div>
+    <p><mat-slide-toggle (change)="changePersons = !changePersons"> </mat-slide-toggle></p>
+</div>
+<div style="height: 1000px; width: 100%">
+    <cern-time-scheduler
+        [persons]="persons"
+        [groups]="sections"
+        [periods]="periods"
+        [hiddenPeriods]="headerPeriods"
+        [eventItems]="eventItems"
+        [utc]="false"
+        [changePersons]="changePersons"
+    ></cern-time-scheduler>
+</div>

@@ -1,9 +1,10 @@
 <div
     class="gridItem"
-    [style.width.px]="width - 7"
-    [style.max-width.px]="width - 7"
+    [style.width.px]="width >= 32 ? width - 7 : width"
+    [style.max-width.px]="width"
+    [style.padding-left.px]="width >= 32 ? 5 : 0"
     [style.color]="color"
-    [style.border-color]="color !== 'white' ? color : 'black'"
+    [style.border-color]="color !== 'white' ? color : 'black' "
     [style.background-color]="backgroundColor"
     [style.height.px]="height - 1"
 >

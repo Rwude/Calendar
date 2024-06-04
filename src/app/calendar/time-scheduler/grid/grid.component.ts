@@ -26,6 +26,7 @@ export class GridComponent implements OnChanges {
     @Input() columnWidth = 100;
     @Input() minuteWidth = 0;
     @Input() eventItems: EventItem[] = [];
+    @Input() changePersons: boolean = true;
     @Input() groups: Group[] = [];
 
     @Output() cellEvent = new EventEmitter<{type: string, row: number, col: number}>();
@@ -37,7 +38,6 @@ export class GridComponent implements OnChanges {
     totalHeight!: number;
 
     constructor(private timeFunctions: TimeFunctionsService) {
-        this.gridPositions = this.eventItems.map((item, idx) => this.getItemPosition(item, idx, 0, 0));
     }
 
     ngOnChanges() {
@@ -45,7 +45,7 @@ export class GridComponent implements OnChanges {
         const allPersons = this.allRows.map(r => r.childId).filter((value): value is number => value !== undefined);
         const allGroups = this.groups.map(g => g.id);
         this.updateItems(allPersons, allGroups);
-        this.generateGrid();
+        if (this.dynamicGrid) this.generateGrid();
     }
 
     calculateTotalHeight() {
@@ -123,7 +123,7 @@ export class GridComponent implements OnChanges {
             position.left = 0;
         } else if (start < this.startEndValue.end) {
             diff = start - this.startEndValue.start;
-            position.left = Math.floor(this.timeFunctions.getMinutes(diff) * this.minuteWidth);
+            position.left = this.timeFunctions.getMinutes(diff) * this.minuteWidth;
         }
         if (start >= this.startEndValue.start) {
             if (end <= this.startEndValue.end) {
@@ -136,7 +136,7 @@ export class GridComponent implements OnChanges {
         } else {
             diff = this.startEndValue.end - this.startEndValue.start;
         }
-        position.width = Math.floor(this.timeFunctions.getMinutes(diff) * this.minuteWidth);
+        position.width = this.timeFunctions.getMinutes(diff) * this.minuteWidth;
         if (position.width <= 0 || position.top === undefined) {
             position.visible = false
         }
@@ -153,14 +153,14 @@ export class GridComponent implements OnChanges {
         } else {
             const minutes = Math.floor(dragPosition.x / this.minuteWidth);
             const dragPrecisionInMinutes = this.timeFunctions.getMinutes(item.dragPrecision[0] * item.dragPrecision[1]);
-            const nbOfDrags = Math.floor(minutes / dragPrecisionInMinutes);
+            const nbOfDrags = minutes / dragPrecisionInMinutes;
             pseudoTimeframe = nbOfDrags * item.dragPrecision[0] * item.dragPrecision[1]
         }
 
         const position = this.getItemPosition(item, idx,10, pseudoTimeframe);
         this.gridPositions[idx].width = position.width;
         const {height} = this.getHeightAndId(position.top!, dragPosition.y,);
-        this.gridPositions[idx].top! = height;
+        if (this.changePersons) this.gridPositions[idx].top! = height;
         this.gridPositions[idx].left! = position.left!;
         this.gridPositions[idx].zIndex = position.zIndex;
         this.dragPosition = {x: 0, y: 0}
@@ -173,7 +173,7 @@ export class GridComponent implements OnChanges {
         const oldChildId = item.childId;
         const {childId} = this.getHeightAndId(position.top!, dragPosition.y);
         if (childId !== undefined) {
-            this.eventItems[idx].childId = childId;
+            if (this.changePersons) this.eventItems[idx].childId = childId;
             this.gridPositions[idx].zIndex = position.zIndex;
             if (item.dragPrecision) {
                 const minutes = Math.floor(dragPosition.x / this.minuteWidth);
@@ -242,6 +242,7 @@ export class GridComponent implements OnChanges {
             }
             return this.getItemPosition(item, idx, 0, 0);
         });
+        this.allRowsChange.emit(this.allRows);
     }
 
     getCollisions(childIds: number[]) {

@@ -1,4 +1,4 @@
-<div style=" height: 100%">
+<div style="border: 5px solid black">
     <app-calendar-header
         [periods]="periods"
         [currentPeriod]="currentPeriod!"
@@ -14,7 +14,7 @@
             <div [style.height]="(timeFrameHeaders!.bigHeader.length !== 0 ? 80 : 40) + 'px'">
                 <button (click)="toggleSidebar()" mat-raised-button>click</button>
             </div>
-            <div #scrollHorizontal>
+            <div style="position: relative;" #scrollHorizontal>
                 @for (section of treeData; track section) {
                     <div  class="personOrSection" [style.background-color]="section.hovered ? 'grey' : ''" [style.color]="section.hovered ? 'white' : ''" [style.height]="section.height + 'px'">
                         @if (section.isChild) {
@@ -49,7 +49,7 @@
                 }
             </div>
         </mat-drawer>
-        <div style="height: 100%; " #calendarContent>
+        <div style="overflow-y: hidden" #calendarContent>
             <div class="timeTable" #scrollVertical>
                 <table class="time-sch-table" [style.width.px]="calendarWidth" [style.height.px]="(timeFrameHeaders!.bigHeader.length !== 0 ? 80 : 40)">
                     <tr *ngIf="timeFrameHeaders?.bigHeader">
@@ -73,13 +73,14 @@
                     >&#9660;</span>
                 }
             </div>
-            <div class="calendarContent"  (scroll)="updateScroll(scrollHorizontal, scrollVertical)" [style.width.px]="calendarWidth !== 0 ? calendarWidth : ''">
+            <div class="calendarContent"  (scroll)="updateScroll(scrollHorizontal, scrollVertical)" [style.width.px]="calendarWidth" [style.height.px]="calendarHeight">
                 @if (timeFrameHeaders) {
                     <calendar-grid
                         [columnWidth]="cellWidth"
                         [totalColumns]="timeFrameHeaders.smallHeader.length"
                         [allRows]="rowsData"
                         [eventItems]="eventItems"
+                        [changePersons]="changePersons"
                         [groups]="groups"
                         [startEndValue]="startAndEnd"
                         [minuteWidth]="minuteWidth"
