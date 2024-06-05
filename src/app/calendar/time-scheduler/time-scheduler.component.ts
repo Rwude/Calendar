@@ -321,7 +321,7 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
                     if (t.children && t.showChildren) {
                         t.children?.forEach(child => {
                             if (i === event.row) {
-                                console.log(this.eventItems.filter(i => i.childId === child.id && t.isChild));
+                                console.log(this.eventItems.filter(i => i.childId === child.id && child.isChild));
                             }
                             i += 1;
                         })

@@ -166,6 +166,7 @@ export class GridComponent implements OnChanges {
         if (this.changePersons) this.gridPositions[idx].top! = height;
         this.gridPositions[idx].left! = position.left!;
         this.gridPositions[idx].zIndex = position.zIndex;
+        this.calculatePseudoPosition(idx)
         this.dragPosition = {x: 0, y: 0}
     }
 
@@ -237,16 +238,19 @@ export class GridComponent implements OnChanges {
             height += this.allRows[idx].height;
         }
 
-        this.gridPositions = this.eventItems.map((item, idx) => {
+        this.gridPositions = [];
+        this.eventItems.forEach((item, idx) => {
             const row = allChangedChildRows.find(row => row.childId === item.childId);
             if (row) {
                 const includedRow = row.rows.find(row => row.eventItems.includes(item.id));
                 if (includedRow) {
                     const addedHeight = includedRow!.height;
-                    return this.getItemPosition(item, idx, 0, 0, addedHeight);
+                    this.gridPositions.push(this.getItemPosition(item, idx, 0, 0, addedHeight));
                 }
+            } else {
+                this.gridPositions.push(this.getItemPosition(item, idx, 0, 0));
             }
-            return this.getItemPosition(item, idx, 0, 0);
+            if (this.isInTimeframe(item)) this.calculatePseudoPosition(this.gridPositions.length - 1)
         });
         this.allRowsChange.emit(this.allRows);
     }
@@ -351,7 +355,7 @@ export class GridComponent implements OnChanges {
                     left = 0;
                 } else if (start < this.startEndValue.end) {
                     diff = start - this.startEndValue.start;
-                    left = Math.floor(this.timeFunctions.getMinutes(diff) * this.minuteWidth);
+                    left = Math.round(this.timeFunctions.getMinutes(diff) * this.minuteWidth);
                 }
                 if (start >= this.startEndValue.start) {
                     if (end <= this.startEndValue.end) {
@@ -364,7 +368,7 @@ export class GridComponent implements OnChanges {
                 } else {
                     diff = this.startEndValue.end - this.startEndValue.start;
                 }
-                const width = Math.floor(this.timeFunctions.getMinutes(diff) * this.minuteWidth);
+                const width = Math.round(this.timeFunctions.getMinutes(diff) * this.minuteWidth);
                 this.groupPositions[groupId].push({top: timeframeHeight, left: left, width: width, color: r.color})
             });
         });
@@ -376,6 +380,20 @@ export class GridComponent implements OnChanges {
 
     isInTimeframe(eventItem: EventItem) {
         return (eventItem.start >= this.startEndValue.start && eventItem.start < this.startEndValue.end) || (eventItem.end >= this.startEndValue.start && eventItem.end < this.startEndValue.end) || (eventItem.start < this.startEndValue.start && eventItem.end >= this.startEndValue.end);
+    }
+
+    calculatePseudoPosition(idx: number) {
+        const left = this.gridPositions[idx].left!;
+        const width = this.gridPositions[idx].width!;
+        if (left + width / 2 - 85 <= 5) {
+            this.gridPositions[idx].pseudoLeft = 90;
+        } else if (left + width / 2 + 90 >= this.totalColumns * this.columnWidth) {
+            const diff = left + 90 - this.totalColumns * this.columnWidth;
+            this.gridPositions[idx].pseudoLeft = - diff;
+        } else {
+            this.gridPositions[idx].pseudoLeft = width / 2;
+        }
+
     }
 
     getHeightAndId(oldPosition: number, delta: number) {
