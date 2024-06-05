@@ -88,8 +88,8 @@ export class GridComponent implements OnChanges {
         }
     }
 
-    getItemPosition(eventItem: EventItem, index: number, zIndex: number, pseudoTimeframe: number, additionalHeight: number | undefined = undefined) {
-        let position: GridPosition = {eventIndex: index, visible: true};
+    getItemPosition(eventItem: EventItem, index: number, itemIndex: number, zIndex: number, pseudoTimeframe: number, additionalHeight: number | undefined = undefined) {
+        let position: GridPosition = {eventIndex: itemIndex, visible: true};
         let height: number = 0;
         for (let idx = 0; idx < this.allRows.length; idx ++) {
             if (this.allRows[idx].childId === eventItem.childId) {
@@ -152,7 +152,7 @@ export class GridComponent implements OnChanges {
             this.gridPositions[idx].pseudoEnd = item.end + pseudoTimeframe;
         }
 
-        const position = this.getItemPosition(item, idx,1, pseudoTimeframe);
+        const position = this.getItemPosition(item, idx, this.gridPositions[idx].eventIndex, 1, pseudoTimeframe);
         this.gridPositions[idx].width = position.width;
         const {height} = this.getHeightAndId(position.top!, dragPosition.y,);
         if (this.changePersons) this.gridPositions[idx].top! = height;
@@ -165,7 +165,7 @@ export class GridComponent implements OnChanges {
     dragEnd(event: CdkDragEnd, idx: number) {
         const dragPosition = event.distance;
         const item = this.eventItems[idx];
-        const position = this.getItemPosition(item, idx, 0, 0);
+        const position = this.getItemPosition(item, idx, this.gridPositions[idx].eventIndex, 0, 0);
         const oldChildId = item.childId;
         const {childId} = this.getHeightAndId(position.top!, dragPosition.y);
         if (item.dragPrecision) {
@@ -231,20 +231,22 @@ export class GridComponent implements OnChanges {
         }
 
         let idx = 0;
-        this.eventItems.forEach((item) => {
+        this.eventItems.forEach((item, index) => {
             const row = allChangedChildRows.find(row => row.childId === item.childId);
             if (row) {
                 const includedRow = row.rows.find(row => row.eventItems.includes(item.id));
                 if (includedRow) {
                     const addedHeight = includedRow!.height;
-                    this.gridPositions[idx] = this.getItemPosition(item, idx, 0, 0, addedHeight);
+                    this.gridPositions[idx] = this.getItemPosition(item, idx, index, 0, 0, addedHeight);
                 }
             } else {
-                this.gridPositions[idx] = this.getItemPosition(item, idx, 0, 0);
+                this.gridPositions[idx] = this.getItemPosition(item, idx, index, 0, 0);
             }
             if (this.isInTimeframe(item)) {
                 this.calculatePseudoPosition(idx)
                 idx += 1;
+            } else {
+                this.gridPositions.splice(idx, 1)
             }
 
         });
