@@ -1,12 +1,4 @@
-import {
-    Component,
-    ElementRef,
-    EventEmitter,
-    Input,
-    OnChanges,
-    Output,
-    ViewChild
-} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, OnChanges, Output, ViewChild} from '@angular/core';
 import {EventItem, GridPosition, Group, GroupPosition} from "../../models";
 import {TimeFunctionsService} from "../../time-functions.service";
 import {CdkDragEnd, CdkDragMove} from "@angular/cdk/drag-drop";
@@ -390,14 +382,13 @@ export class GridComponent implements OnChanges {
         const left = this.gridPositions[idx].left!;
         const width = this.gridPositions[idx].width!;
         if (left + width / 2 - 85 <= 5) {
-            this.gridPositions[idx].pseudoLeft = 90;
+            this.gridPositions[idx].pseudoLeft = 90 - left;
         } else if (left + width / 2 + 90 >= this.totalColumns * this.columnWidth) {
             const diff = left + 90 - this.totalColumns * this.columnWidth;
             this.gridPositions[idx].pseudoLeft = - diff;
         } else {
             this.gridPositions[idx].pseudoLeft = width / 2;
         }
-
     }
 
     getHeightAndId(oldPosition: number, delta: number) {
