@@ -107,7 +107,7 @@ export class GridComponent implements OnChanges {
                 } else {
                     if (this.gridPositions[index]?.additionalHeight !== undefined) {
                         position.top = height + this.gridPositions[index].additionalHeight!;
-                        position.additionalHeight = this.gridPositions[index].additionalHeight!
+                        position.additionalHeight = this.gridPositions[index].additionalHeight!;
                     } else {
                         position.top = height;
                         position.additionalHeight = 0;
@@ -238,19 +238,23 @@ export class GridComponent implements OnChanges {
             height += this.allRows[idx].height;
         }
 
-        this.gridPositions = [];
-        this.eventItems.forEach((item, idx) => {
+        let idx = 0;
+        this.eventItems.forEach((item) => {
             const row = allChangedChildRows.find(row => row.childId === item.childId);
             if (row) {
                 const includedRow = row.rows.find(row => row.eventItems.includes(item.id));
                 if (includedRow) {
                     const addedHeight = includedRow!.height;
-                    this.gridPositions.push(this.getItemPosition(item, idx, 0, 0, addedHeight));
+                    this.gridPositions[idx] = this.getItemPosition(item, idx, 0, 0, addedHeight);
                 }
             } else {
-                this.gridPositions.push(this.getItemPosition(item, idx, 0, 0));
+                this.gridPositions[idx] = this.getItemPosition(item, idx, 0, 0);
             }
-            if (this.isInTimeframe(item)) this.calculatePseudoPosition(this.gridPositions.length - 1)
+            if (this.isInTimeframe(item)) {
+                this.calculatePseudoPosition(idx)
+                idx += 1;
+            }
+
         });
         this.allRowsChange.emit(this.allRows);
     }
