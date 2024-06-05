@@ -2,7 +2,7 @@
      [style.left]="left + 'px'" [style.top]="top + 'px'" [style.border-color]="eventItem?.backgroundColor ? eventItem?.backgroundColor : 'black'">
     @if (eventItem) {
         <p> {{eventItem.name}} </p>
-        <p> Start: {{eventItem.start}} </p>
-        <p> End: {{eventItem.end}} </p>
+        <p> Start: {{startLabel}} </p>
+        <p> End: {{endLabel}} </p>
     }
 </div>

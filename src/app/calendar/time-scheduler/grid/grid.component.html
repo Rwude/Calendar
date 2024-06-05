@@ -10,14 +10,13 @@
                     [cdkDragFreeDragPosition]="dragPosition"
                     class="calendarItem"
                     [eventItem]="eventItems[item.eventIndex]"
+                    [gridPosition]="item"
                     [width]="item.width!"
                     [height]="20"
-                    [color]="eventItems[item.eventIndex].color ? eventItems[item.eventIndex].color! : 'black'"
-                    [backgroundColor]="eventItems[item.eventIndex].backgroundColor ? eventItems[item.eventIndex].backgroundColor! : 'blue'"
                     [style.visibility]="item.visible ? 'visible' : 'hidden'"
                     [style.top.px]="item.top"
                     [style.left.px]="item.left"
-                    [style.z-index]="item.zIndex"
+                    [style.z-index]="item.zIndex === 1 ? 10 : ''"
                 ></calendar-grid-item>
             }
         }

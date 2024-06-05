@@ -3,6 +3,10 @@
     position: absolute;
 }
 
+.calendarItem:hover {
+    z-index: 10;
+}
+
 .groupItem {
     z-index: 2;
     position: absolute;

@@ -152,13 +152,15 @@ export class GridComponent implements OnChanges {
         if (!item.dragPrecision) {
             pseudoTimeframe = 0
         } else {
-            const minutes = Math.floor(dragPosition.x / this.minuteWidth);
+            const minutes = Math.round(dragPosition.x / this.minuteWidth);
             const dragPrecisionInMinutes = this.timeFunctions.getNumberOfMinutes(item.dragPrecision, item.start, this.utc);
-            const nbOfDrags = minutes / dragPrecisionInMinutes;
-            pseudoTimeframe = nbOfDrags * this.timeFunctions.getTimeFrameLength(item.dragPrecision, item.start, this.utc)
+            const nbOfDrags = Math.round(minutes / dragPrecisionInMinutes);
+            pseudoTimeframe = nbOfDrags * this.timeFunctions.getTimeFrameLength(item.dragPrecision, item.start, this.utc);
+            this.gridPositions[idx].pseudoStart = item.start + pseudoTimeframe;
+            this.gridPositions[idx].pseudoEnd = item.end + pseudoTimeframe;
         }
 
-        const position = this.getItemPosition(item, idx,10, pseudoTimeframe);
+        const position = this.getItemPosition(item, idx,1, pseudoTimeframe);
         this.gridPositions[idx].width = position.width;
         const {height} = this.getHeightAndId(position.top!, dragPosition.y,);
         if (this.changePersons) this.gridPositions[idx].top! = height;
@@ -173,25 +175,27 @@ export class GridComponent implements OnChanges {
         const position = this.getItemPosition(item, idx, 0, 0);
         const oldChildId = item.childId;
         const {childId} = this.getHeightAndId(position.top!, dragPosition.y);
+        if (item.dragPrecision) {
+            const minutes = Math.round(dragPosition.x / this.minuteWidth);
+            const dragPrecisionInMinutes =  this.timeFunctions.getNumberOfMinutes(item.dragPrecision, item.start, this.utc);
+            const nbOfDrags = Math.round(minutes / dragPrecisionInMinutes);
+            const timeFrameLength = this.timeFunctions.getTimeFrameLength(item.dragPrecision, item.start, this.utc);
+            this.eventItems[idx].start += nbOfDrags * timeFrameLength
+            this.eventItems[idx].end += nbOfDrags * timeFrameLength;
+        }
         if (childId !== undefined) {
             if (this.changePersons) this.eventItems[idx].childId = childId;
-            this.gridPositions[idx].zIndex = position.zIndex;
-            if (item.dragPrecision) {
-                const minutes = Math.floor(dragPosition.x / this.minuteWidth);
-                const dragPrecisionInMinutes =  this.timeFunctions.getNumberOfMinutes(item.dragPrecision, item.start, this.utc);
-                const nbOfDrags = Math.floor(minutes / dragPrecisionInMinutes);
-                const timeFrameLength = this.timeFunctions.getTimeFrameLength(item.dragPrecision, item.start, this.utc);
-                this.eventItems[idx].start += nbOfDrags * timeFrameLength
-                this.eventItems[idx].end += nbOfDrags * timeFrameLength;
-            }
             const groupIds = this.groups.filter(g => g.childIds.includes(oldChildId) || g.childIds.includes(childId)).map(g => g.id);
             this.updateItems([oldChildId, childId], groupIds);
             this.generateGrid();
         } else {
-            this.gridPositions[idx].top = position.top!;
-            this.gridPositions[idx].left = position.left!;
-            this.gridPositions[idx].zIndex = position.zIndex;
+            const groupIds = this.groups.filter(g => g.childIds.includes(oldChildId)).map(g => g.id);
+            this.updateItems([oldChildId], groupIds);
+            this.generateGrid();
         }
+        this.gridPositions[idx].zIndex = position.zIndex;
+        this.gridPositions[idx].pseudoStart = undefined;
+        this.gridPositions[idx].pseudoEnd = undefined;
 
         this.dragPosition = {x: 0, y: 0}
     }
