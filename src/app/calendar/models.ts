@@ -89,6 +89,7 @@ export interface GridPosition {
     pseudoStart?: number;
     pseudoEnd?: number;
     pseudoLeft?: number;
+    pseudoTop?: number;
     zIndex?: number;
     additionalHeight?: number;
 }

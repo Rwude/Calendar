@@ -381,6 +381,7 @@ export class GridComponent implements OnChanges {
     calculatePseudoPosition(idx: number) {
         const left = this.gridPositions[idx].left!;
         const width = this.gridPositions[idx].width!;
+        const top = this.gridPositions[idx].top!;
         if (left + width / 2 - 85 <= 5) {
             this.gridPositions[idx].pseudoLeft = 90 - left;
         } else if (left + width / 2 + 90 >= this.totalColumns * this.columnWidth) {
@@ -388,6 +389,11 @@ export class GridComponent implements OnChanges {
             this.gridPositions[idx].pseudoLeft = - diff;
         } else {
             this.gridPositions[idx].pseudoLeft = width / 2;
+        }
+        if (top + 135 >= this.totalHeight) {
+            this.gridPositions[idx].pseudoTop = - 121
+        } else {
+            this.gridPositions[idx].pseudoTop = 20
         }
     }
 
