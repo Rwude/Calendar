@@ -55,7 +55,12 @@ export class CalendarTooltipDirective implements OnChanges{
         tooltipRef.instance.eventItem = this.eventItem;
         tooltipRef.instance.left = this.left!;
         tooltipRef.instance.top = this.top!;
-        tooltipRef.instance.update(this.eventItem!.start, this.eventItem!.end, this.utc)
+        if (this.pseudoStart && this.pseudoEnd) {
+            this.tooltip.instance.update(this.pseudoStart, this.pseudoEnd, this.utc);
+        } else {
+            this.tooltip.instance.update(this.eventItem!.start, this.eventItem!.end, this.utc)
+
+        }
     }
 
     hide() {

@@ -1,19 +1,18 @@
 <div style="position: relative" #container>
     <svg #dynamicGrid width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
     </svg>
-        @for (item of gridPositions; track item.eventIndex) {
-            @if (item.width! > 0) {
+        @for (item of gridPositions; track item.eventIndex; let idx = $index) {
+            @if (item.width) {
                 <calendar-grid-item
                     cdkDrag
-                    (cdkDragMoved)="dragMove($event, item.eventIndex)"
-                    (cdkDragEnded)="dragEnd($event, item.eventIndex)"
+                    (cdkDragMoved)="dragMove($event, idx)"
+                    (cdkDragEnded)="dragEnd($event, idx)"
                     [cdkDragFreeDragPosition]="dragPosition"
                     class="calendarItem"
                     [eventItem]="eventItems[item.eventIndex]"
                     [gridPosition]="item"
                     [width]="item.width!"
                     [height]="20"
-                    [style.visibility]="item.visible ? 'visible' : 'hidden'"
                     [style.top.px]="item.top"
                     [style.left.px]="item.left"
                     [style.z-index]="item.zIndex === 1 ? 10 : ''"
