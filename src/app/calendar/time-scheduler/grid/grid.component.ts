@@ -1,4 +1,14 @@
-import {Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild} from '@angular/core';
+import {
+    Component,
+    ElementRef,
+    EventEmitter,
+    Input,
+    OnChanges,
+    OnInit,
+    Output,
+    SimpleChanges,
+    ViewChild
+} from '@angular/core';
 import {EventItem, GridPosition, Group, GroupPosition} from "../../models";
 import {TimeFunctionsService} from "../../time-functions.service";
 import {CdkDragEnd, CdkDragMove} from "@angular/cdk/drag-drop";
@@ -8,7 +18,7 @@ import {CdkDragEnd, CdkDragMove} from "@angular/cdk/drag-drop";
   templateUrl: './grid.component.html',
   styleUrl: './grid.component.scss'
 })
-export class GridComponent implements OnChanges {
+export class GridComponent implements OnInit, OnChanges {
     @ViewChild('dynamicGrid') dynamicGrid!: ElementRef<SVGElement>;
     @ViewChild('container', { static: false }) container!: ElementRef;
 
@@ -38,6 +48,16 @@ export class GridComponent implements OnChanges {
         if(changes['maxHeight']) {
             this.gridPositions.forEach((g, idx) => this.calculatePseudoPosition(idx));
         }
+        if (changes['startEndValue'] || changes['eventItems'] || changes['columnWidth'] || changes['allRows']) {
+            this.setupGrid();
+        }
+    }
+
+    ngOnInit() {
+        this.setupGrid();
+    }
+
+    setupGrid() {
         this.allRows.forEach(r => r.height = 40);
         const allPersons = this.allRows.map(r => r.childId).filter((value): value is number => value !== undefined);
         this.gridPositions = this.eventItems.map((item, idx) => {

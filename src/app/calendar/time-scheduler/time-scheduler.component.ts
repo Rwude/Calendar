@@ -92,7 +92,6 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     ngAfterViewInit() {
         this.setupResizeObserver();
         this.calculateWidth(this.calendarContent.nativeElement.clientWidth);
-        this.maxHeight = this.calendarContent.nativeElement.clientHeight + this.calendarContent.nativeElement.scrollTop;
         this.calendarContent.nativeElement.addEventListener('scroll', () => {
             this.hoverCorrectTreeNode()
             this.scrollHorizontal.nativeElement.scrollTop = this.calendarContent.nativeElement.scrollTop;
@@ -110,7 +109,9 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
             this.currentPosition = undefined;
             this.hoverCorrectTreeNode()
         });
-        this.maxHeight = this.calendarContent.nativeElement.clientHeight - this.calendarContent.nativeElement.scrollTop;
+        setTimeout(() => {
+            this.maxHeight = this.calendarContent.nativeElement.clientHeight + this.calendarContent.nativeElement.scrollTop;
+        })
     }
 
     ngOnDestroy() {
@@ -174,7 +175,6 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
                 }
             }
         });
-
         if (this.calendarContent) {
             this.resizeObserver.observe(this.calendarContent.nativeElement);
         }
@@ -182,6 +182,7 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
 
     onContainerResize(newWidth: number) {
         this.calculateWidth(newWidth);
+
         this.cdr.detectChanges();
     }
 
@@ -344,9 +345,8 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
         this.start = this.currentPeriod.start;
         this.startAndEnd = {start: this.start!, end: this.start! + this.timeFunctions.getTimeFrameLength(this.currentPeriod!.timeFrame, this.start!, this.utc)};
         this.timeFrameHeaders = this.getTimeFrameHeaders(this.currentPeriod);
-        this.calendarContent.nativeElement.style.width = 'auto';
         this.calculateWidth(this.calendarContent.nativeElement.clientWidth);
-        this.performAction()
+        this.performAction();
     }
 
     onCellClicked(event: { row: number, col: number }) {
