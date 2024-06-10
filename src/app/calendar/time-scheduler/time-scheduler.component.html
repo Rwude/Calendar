@@ -121,6 +121,7 @@
                         [groups]="groups"
                         [startEndValue]="startAndEnd"
                         [minuteWidth]="minuteWidth"
+                        [maxHeight]="maxHeight - (timeFrameHeaders!.bigHeader.length !== 0 ? 80 : 40)"
                         (cellEvent)="onCellClicked($event)"
                         (allRowsChange)="onAllRowsChange($event)"
                     ></calendar-grid>

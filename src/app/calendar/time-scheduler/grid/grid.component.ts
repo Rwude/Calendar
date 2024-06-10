@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, Input, OnChanges, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {EventItem, GridPosition, Group, GroupPosition} from "../../models";
 import {TimeFunctionsService} from "../../time-functions.service";
 import {CdkDragEnd, CdkDragMove} from "@angular/cdk/drag-drop";
@@ -17,6 +17,7 @@ export class GridComponent implements OnChanges {
     @Input() totalColumns = 50;
     @Input() columnWidth = 100;
     @Input() minuteWidth = 0;
+    @Input() maxHeight = 0;
     @Input() eventItems: EventItem[] = [];
     @Input() changePersons: boolean = true;
     @Input() groups: Group[] = [];
@@ -33,7 +34,10 @@ export class GridComponent implements OnChanges {
     constructor(private timeFunctions: TimeFunctionsService) {
     }
 
-    ngOnChanges() {
+    ngOnChanges(changes:SimpleChanges) {
+        if(changes['maxHeight']) {
+            this.gridPositions.forEach((g, idx) => this.calculatePseudoPosition(idx));
+        }
         this.allRows.forEach(r => r.height = 40);
         const allPersons = this.allRows.map(r => r.childId).filter((value): value is number => value !== undefined);
         this.gridPositions = this.eventItems.map((item, idx) => {
@@ -78,7 +82,7 @@ export class GridComponent implements OnChanges {
                 rect.addEventListener('mouseleave', () => this.onCellEvent('leave', row, col));
                 rect.setAttribute('fill', color);
                 rect.setAttribute('stroke', 'gray'); // todo: custom theming
-                rect.setAttribute('stroke-width', '1');
+                rect.setAttribute('stroke-width', '0.5');
                 svg.appendChild(rect);
 
                 currentX += columnWidth;
@@ -392,7 +396,7 @@ export class GridComponent implements OnChanges {
         } else {
             this.gridPositions[idx].pseudoLeft = width / 2;
         }
-        if (top + 135 >= this.totalHeight) {
+        if (top + 135 >= this.maxHeight) {
             this.gridPositions[idx].pseudoTop = - 121
         } else {
             this.gridPositions[idx].pseudoTop = 20

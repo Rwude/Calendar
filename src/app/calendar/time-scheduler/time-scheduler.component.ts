@@ -48,6 +48,7 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     calendarWidth: number = 0;
     cellWidth: number = 0;
     minuteWidth: number = 0;
+    maxHeight: number = 0;
     startAndEnd: {start: number, end: number} = {start: 0, end: 0};
 
     private resizeObserver!: ResizeObserver;
@@ -90,9 +91,14 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     ngAfterViewInit() {
         this.setupResizeObserver();
         this.calculateWidth(this.calendarContent.nativeElement.clientWidth);
-        this.calendarContent.nativeElement.addEventListener('scroll', (event) => {
+        this.maxHeight = this.calendarContent.nativeElement.clientHeight + this.calendarContent.nativeElement.scrollTop;
+        this.calendarContent.nativeElement.addEventListener('scroll', () => {
             this.scrollHorizontal.nativeElement.scrollTop = this.calendarContent.nativeElement.scrollTop;
+            this.calendarContent.nativeElement.scrollTop = this.scrollHorizontal.nativeElement.scrollTop;
+            this.maxHeight = this.calendarContent.nativeElement.clientHeight + this.calendarContent.nativeElement.scrollTop;
         });
+        this.maxHeight = this.calendarContent.nativeElement.clientHeight - this.calendarContent.nativeElement.scrollTop;
+        console.log(this.maxHeight)
     }
 
     ngOnDestroy() {
