@@ -3,6 +3,11 @@
     position: absolute;
 }
 
+.container {
+    position: relative;
+    margin: 0;
+}
+
 .calendarItem:hover {
     z-index: 10;
 }

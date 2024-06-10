@@ -60,9 +60,6 @@ export class GridComponent implements OnChanges {
         }
         let currentY = 0;
         this.totalHeight = this.calculateTotalHeight();
-        let totalHeight = this.totalHeight;
-        this.dynamicGrid.nativeElement.setAttribute('height', (totalHeight).toString());
-
         for (let row = 0; row < this.allRows.length; row++) {
             const rowHeight = this.allRows[row].height;
             const color = this.allRows[row].color;

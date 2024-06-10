@@ -73,56 +73,58 @@
                     }
                 }
             </div>
-            </div>
+        </div>
         <div #calendarContent class="calendarContent">
-            <div>
-                <div #scrollVertical class="timeTable">
-                    <table [style.height.px]="(timeFrameHeaders!.bigHeader.length !== 0 ? 80 : 40)" [style.width.px]="calendarWidth"
-                           class="time-sch-table">
-                        <tr *ngIf="timeFrameHeaders?.bigHeader">
-                            @for (bigHeader of timeFrameHeaders?.bigHeader; track bigHeader) {
-                                <td [colSpan]="bigHeader.smallHeaderIds.length"
-                                    (click)="currentPeriod?.headerClickable && headerClicked(bigHeader.start, true)"
-                                    [style.cursor]="currentPeriod?.headerClickable ? 'pointer' : 'auto'">
-                                    {{ bigHeader.name }}
-                                </td>
-                            }
-                        </tr>
-                        <tr *ngIf="timeFrameHeaders?.smallHeader">
-                            @for (smallHeader of timeFrameHeaders?.smallHeader; track smallHeader) {
-                                <td [style.background-color]="smallHeader.hovered ? 'grey' : ''"
-                                    [style.color]="smallHeader.hovered ? 'white' : ''"
-                                    (click)="currentPeriod?.headerClickable && headerClicked(smallHeader.start, false)"
-                                    [style.cursor]="currentPeriod?.headerClickable ? 'pointer' : 'auto'">
-                                    {{ smallHeader.name }}
-                                </td>
-                            }
-                        </tr>
-                    </table>
-                    @if (currentMinute >= 0 && currentMinute * minuteWidth <= calendarWidth) {
-                        <span class="currentTime"
-                              [style.left.px]="currentMinute * minuteWidth - 5"
-                        >&#9660;</span>
-                    }
-                </div>
-                <div
-                     [style.width.px]="calendarWidth"
-                     class="calendarGrid">
-                    @if (timeFrameHeaders) {
-                        <calendar-grid
-                            [columnWidth]="cellWidth"
-                            [totalColumns]="timeFrameHeaders.smallHeader.length"
-                            [allRows]="rowsData"
-                            [eventItems]="eventItems"
-                            [changePersons]="changePersons"
-                            [groups]="groups"
-                            [startEndValue]="startAndEnd"
-                            [minuteWidth]="minuteWidth"
-                            (cellEvent)="onCellClicked($event)"
-                            (allRowsChange)="onAllRowsChange($event)"
-                        ></calendar-grid>
-                    }
-                </div>
+            <div class="timeTable">
+                <table
+                    [style.height.px]="(timeFrameHeaders!.bigHeader.length !== 0 ? 80 : 40)"
+                    [style.width.px]="calendarWidth"
+                    class="time-sch-table"
+                >
+                    <tr *ngIf="timeFrameHeaders?.bigHeader">
+                        @for (bigHeader of timeFrameHeaders?.bigHeader; track bigHeader) {
+                            <td [colSpan]="bigHeader.smallHeaderIds.length"
+                                (click)="currentPeriod?.headerClickable && headerClicked(bigHeader.start, true)"
+                                [style.cursor]="currentPeriod?.headerClickable ? 'pointer' : 'auto'">
+                                {{ bigHeader.name }}
+                            </td>
+                        }
+                    </tr>
+                    <tr *ngIf="timeFrameHeaders?.smallHeader">
+                        @for (smallHeader of timeFrameHeaders?.smallHeader; track smallHeader) {
+                            <td [style.background-color]="smallHeader.hovered ? 'grey' : ''"
+                                [style.color]="smallHeader.hovered ? 'white' : ''"
+                                (click)="currentPeriod?.headerClickable && headerClicked(smallHeader.start, false)"
+                                [style.cursor]="currentPeriod?.headerClickable ? 'pointer' : 'auto'">
+                                {{ smallHeader.name }}
+                            </td>
+                        }
+                    </tr>
+                </table>
+                @if (currentMinute >= 0 && currentMinute * minuteWidth <= calendarWidth) {
+                    <span class="currentTime"
+                          [style.left.px]="currentMinute * minuteWidth - 5"
+                    >&#9660;</span>
+                }
+            </div>
+            <div
+                [style.width.px]="calendarWidth"
+                class="calendarGrid"
+            >
+                @if (timeFrameHeaders) {
+                    <calendar-grid
+                        [columnWidth]="cellWidth"
+                        [totalColumns]="timeFrameHeaders.smallHeader.length"
+                        [allRows]="rowsData"
+                        [eventItems]="eventItems"
+                        [changePersons]="changePersons"
+                        [groups]="groups"
+                        [startEndValue]="startAndEnd"
+                        [minuteWidth]="minuteWidth"
+                        (cellEvent)="onCellClicked($event)"
+                        (allRowsChange)="onAllRowsChange($event)"
+                    ></calendar-grid>
+                }
             </div>
         </div>
     </div>
