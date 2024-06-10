@@ -25,6 +25,8 @@ import {TimeFunctionsService} from "../time-functions.service";
 })
 export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     @ViewChild('calendarContent') calendarContent!: ElementRef<HTMLDivElement>;
+    @ViewChild('scrollMain') scrollMain!: ElementRef<HTMLDivElement>;
+    @ViewChild('scrollHorizontal') scrollHorizontal!: ElementRef<HTMLDivElement>;
 
     @Input() persons!: Child[];
     @Input() groups: Group[] = [];
@@ -88,6 +90,10 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     ngAfterViewInit() {
         this.setupResizeObserver();
         this.calculateWidth(this.calendarContent.nativeElement.clientWidth);
+        this.calendarContent.nativeElement.addEventListener('scroll', (event) => {
+            this.scrollHorizontal.nativeElement.scrollTop = this.calendarContent.nativeElement.scrollTop;
+            console.log(event);
+        });
     }
 
     ngOnDestroy() {
@@ -105,12 +111,12 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
             let children: TreeData[] = [];
             g.childIds.forEach(id => {
                 const person = this.persons.find(p => p.id === id)
-                children.push({name: person!.name, isChild: true, id: person!.id, hovered: false, height: 40})
+                children.push({name: person!.name, isChild: true, shortName: person!.shortName, id: person!.id, hovered: false, height: 40})
             });
             treeData.push({name: g.name, isChild: false, id: g.id, hovered: false, showChildren: true, children: children, height: 40});
         });
         this.persons.filter(p => p.groupId === -1).forEach(p => {
-            treeData.push({name: p.name, isChild: true, id: p!.id, hovered: false, height: 40});
+            treeData.push({name: p.name, isChild: true, shortName: p.shortName, id: p!.id, hovered: false, height: 40});
         });
         return treeData;
     }
@@ -361,6 +367,7 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
 
     updateScroll(scrollMain: HTMLElement, scrollHorizontal: HTMLElement, scrollVertical: HTMLElement) {
         scrollHorizontal.scrollTop = scrollMain.scrollTop;
+        console.log(scrollMain.scrollTop)
         scrollVertical.scrollLeft = scrollMain.scrollLeft;
     }
 }

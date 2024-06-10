@@ -5,6 +5,8 @@ import {MatButtonToggleModule} from "@angular/material/button-toggle";
 import {MatTooltipModule} from "@angular/material/tooltip";
 import {MatButtonModule} from "@angular/material/button";
 import {CdkDrag} from "@angular/cdk/drag-drop";
+import {MatDivider} from "@angular/material/divider";
+import {FormsModule} from "@angular/forms";
 
 
 
@@ -19,6 +21,8 @@ import {CdkDrag} from "@angular/cdk/drag-drop";
         MatButtonModule,
         MatIconModule,
         CdkDrag,
+        MatDivider,
+        FormsModule,
     ],
     exports: [
         MatButtonModule,
@@ -29,6 +33,8 @@ import {CdkDrag} from "@angular/cdk/drag-drop";
         MatButtonModule,
         MatIconModule,
         CdkDrag,
+        MatDivider,
+        FormsModule,
     ]
 })
 export class MaterialModule { }

@@ -6,7 +6,6 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {GridComponent} from "./time-scheduler/grid/grid.component";
 import {CalendarHeaderComponent} from "./calendar-header/calendar-header.component";
 import {GridItemComponent} from "./time-scheduler/grid/grid-item/grid-item.component";
-import {FormsModule} from "@angular/forms";
 import {GroupEventPreviewComponent} from "./time-scheduler/grid/group-event-preview/group-event-preview.component";
 import {CalendarTooltipComponent} from "./calendar-tooltip/calendar-tooltip.component";
 import {CalendarTooltipDirective} from "./calendar-tooltip/calendar-tooltip.directive";
@@ -25,7 +24,6 @@ import {CalendarTooltipDirective} from "./calendar-tooltip/calendar-tooltip.dire
         CommonModule,
         BrowserAnimationsModule,
         MaterialModule,
-        FormsModule,
     ],
   exports: [
       TimeSchedulerComponent

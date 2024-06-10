@@ -71,6 +71,7 @@ export interface Child {
 
 export interface TreeData {
     name: string;
+    shortName?: string;
     picture?: string;
     isChild: boolean;
     id: number;
@@ -90,6 +91,7 @@ export interface GridPosition {
     pseudoLeft?: number;
     pseudoTop?: number;
     zIndex?: number;
+    cursor?: string;
     additionalHeight?: number;
 }
 

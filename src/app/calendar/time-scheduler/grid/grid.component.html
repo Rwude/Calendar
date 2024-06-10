@@ -1,4 +1,4 @@
-<div style="position: relative" #container>
+<div style="position: relative; margin: 0" [style.height.px]="totalHeight" #container>
     <svg #dynamicGrid width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
     </svg>
         @for (item of gridPositions; track item.eventIndex; let idx = $index) {
@@ -9,13 +9,14 @@
                     (cdkDragEnded)="dragEnd($event, idx)"
                     [cdkDragFreeDragPosition]="dragPosition"
                     class="calendarItem"
-                    [eventItem]="eventItems[item.eventIndex]"
+                    [eventItem]="eventItems[idx]"
                     [gridPosition]="item"
                     [width]="item.width!"
                     [height]="20"
                     [style.top.px]="item.top"
                     [style.left.px]="item.left"
                     [style.z-index]="item.zIndex === 1 ? 10 : ''"
+                    [style.cursor]="item.cursor!"
                 ></calendar-grid-item>
             }
         }

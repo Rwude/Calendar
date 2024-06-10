@@ -1,44 +1,82 @@
-$menu-width-open: 100px;
-$menu-width-closed: 70px;
+.container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+
+    .header {
+        height: 75px;
+    }
+}
 .calendarContainer {
-    position: relative;
+    display: flex;
     border: 1px solid lightgrey;
-    .mat-drawer {
-        box-sizing: content-box;
-        width: var($menu-width-open);
-        transition: all 0.3s ease-in-out !important;
+    width: 100%;
+    height: calc(100% - 70px);
+    flex: 1;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    background-color: #fdfbff;
+
+    .sidenav {
+        margin: 0;
+        overflow-y: auto;
+
+        .sidenavHeader {
+            position: sticky;
+            top: 0;
+            z-index: 150;
+            background-color: #fdfbff;
+        }
+    }
+
+    .openSidenav {
+        width: fit-content;
+        min-width: 200px;
 
         .personOrSection {
-            display: flex;
-
-            padding-left: 5px;
-            padding-right: 5px;
-            justify-content: center;
-            align-items: center;
+            button, .circle {
+                margin-right: 15px;
+            }
         }
+    }
+
+    .closedSidenav {
+        width: 75px;
+    }
+
+    .toggleSidenav {
+        width: 100%;
+        border-radius: 5px;
     }
 
     .calendarContent {
         margin-top: 0;
-        margin-left: var($menu-width-open) !important;
         margin-bottom: 0;
-        transition: all 0.3s ease-in-out !important;
+        padding: 0;
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: auto;
+
     }
 
-    &.container-closed {
-        .mat-drawer {
-            width: $menu-width-closed;
-        }
+}
 
-        .mat-drawer-content {
-        // transform: translateX(64px) !important;
-            margin-left: $menu-width-closed !important;
-        }
-    }
+.personOrSection {
+    display: flex;
+    padding-left: 15px;
+    padding-right: 15px;
+    align-items: center;
+}
+
+.container-closed {
+    width: 100px;
 }
 table {
+    user-select: none;
     table-layout: fixed;
     margin-bottom: 0;
+    background-color: #fdfbff;
 
     td {
         text-align: center;
@@ -46,14 +84,33 @@ table {
 }
 
 .timeTable {
-    position: relative;
+    position: sticky;
+    top: 0;
+    z-index: 150;
 }
 
 .currentTime {
     position: absolute;
     height: 12px;
     bottom: 0;
-    z-index: 2;
+    z-index: 25;
     background: transparent;
     color: black
+}
+
+.circle {
+    width: 35px;
+    height: 35px;
+    background-color: #3498db;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
+
+.treeContainer {
+    position: relative;
 }

@@ -136,6 +136,7 @@ export class GridComponent implements OnChanges {
         }
         position.width = this.timeFunctions.getMinutes(diff) * this.minuteWidth;
         position.zIndex = zIndex;
+        position.cursor = eventItem.dragPrecision || this.changePersons ? 'grab' : 'not-allowed';
         return position
     }
 
@@ -160,7 +161,8 @@ export class GridComponent implements OnChanges {
         if (this.changePersons) this.gridPositions[idx].top! = height;
         this.gridPositions[idx].left! = position.left!;
         this.gridPositions[idx].zIndex = position.zIndex;
-        this.calculatePseudoPosition(idx)
+        this.calculatePseudoPosition(idx);
+        this.gridPositions[idx].cursor = item.dragPrecision || this.changePersons ? 'grabbing' : 'not-allowed';
         this.dragPosition = {x: 0, y: 0}
     }
 
@@ -191,6 +193,7 @@ export class GridComponent implements OnChanges {
         this.gridPositions[idx].zIndex = position.zIndex;
         this.gridPositions[idx].pseudoStart = undefined;
         this.gridPositions[idx].pseudoEnd = undefined;
+        this.gridPositions[idx].cursor = position.cursor;
 
         this.dragPosition = {x: 0, y: 0}
     }
