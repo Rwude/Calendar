@@ -49,6 +49,7 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     cellWidth: number = 0;
     minuteWidth: number = 0;
     maxHeight: number = 0;
+    currentPosition: [number, number] | undefined = undefined;
     startAndEnd: {start: number, end: number} = {start: 0, end: 0};
 
     private resizeObserver!: ResizeObserver;
@@ -93,9 +94,21 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
         this.calculateWidth(this.calendarContent.nativeElement.clientWidth);
         this.maxHeight = this.calendarContent.nativeElement.clientHeight + this.calendarContent.nativeElement.scrollTop;
         this.calendarContent.nativeElement.addEventListener('scroll', () => {
+            this.hoverCorrectTreeNode()
             this.scrollHorizontal.nativeElement.scrollTop = this.calendarContent.nativeElement.scrollTop;
             this.calendarContent.nativeElement.scrollTop = this.scrollHorizontal.nativeElement.scrollTop;
             this.maxHeight = this.calendarContent.nativeElement.clientHeight + this.calendarContent.nativeElement.scrollTop;
+        });
+        this.calendarContent.nativeElement.addEventListener('mousemove', (event) => {
+            let y = event.clientY - this.calendarContent.nativeElement.offsetTop;
+            y -= this.timeFrameHeaders!.bigHeader.length !== 0 ? 80 : 40;
+            const x = event.clientX - this.scrollHorizontal.nativeElement.clientWidth;
+            this.currentPosition = [x, y]
+            this.hoverCorrectTreeNode()
+        });
+        this.calendarContent.nativeElement.addEventListener('mouseleave', () => {
+            this.currentPosition = undefined;
+            this.hoverCorrectTreeNode()
         });
         this.maxHeight = this.calendarContent.nativeElement.clientHeight - this.calendarContent.nativeElement.scrollTop;
     }
@@ -275,22 +288,47 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
         this.rowsData = this.getRowsData();
     }
 
-    hoverCorrectTreeNode(type: string, idx: number) {
-        let i = 0;
-        this.treeData.forEach(t => {
-            if (i === idx) {
-                t.hovered = type === 'hover';
-            }
-            i += 1;
-            if (t.children && t.showChildren) {
-                t.children?.forEach(child => {
-                    if (i === idx) {
-                        child.hovered = type === 'hover';
-                    }
-                    i += 1;
-                })
-            }
-        })
+    hoverCorrectTreeNode() {
+        if (this.currentPosition) {
+            const x = this.currentPosition[0];
+            const y = this.currentPosition[1];
+            const col = Math.floor((x + this.calendarContent.nativeElement.scrollLeft) / this.cellWidth);
+            this.timeFrameHeaders?.smallHeader.forEach((s, idx) => {
+                s.hovered = idx === col && y >= 0;
+            });
+            let height = -this.calendarContent.nativeElement.scrollTop;
+            let found = false;
+            this.treeData.forEach(t => {
+                height += t.height;
+                if (height >= y && !found && y >= 0) {
+                    t.hovered = true;
+                    found = true;
+                } else {
+                    t.hovered = false;
+                }
+                if (t.children && t.showChildren) {
+                    t.children?.forEach(child => {
+                        height += child.height
+                        if (height >= y && !found && y >= 0) {
+                            child.hovered = true;
+                            found = true;
+                        } else {
+                            child.hovered = false;
+                        }
+                    })
+                }
+            });
+        } else {
+            this.timeFrameHeaders?.smallHeader.forEach(s => s.hovered = false);
+            this.treeData.forEach(t => {
+                t.hovered = false;
+                if (t.children && t.showChildren) {
+                    t.children?.forEach(child => {
+                        child.hovered = false;
+                    });
+                }
+            });
+        }
     }
 
     changeTimeFrame(event: {start: number, end: number}) {
@@ -311,34 +349,22 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
         this.performAction()
     }
 
-    onCellClicked(event: { type: string, row: number, col: number }) {
-        switch (event.type) {
-            case 'hover':
-                this.hoverCorrectTreeNode(event.type, event.row)
-                this.timeFrameHeaders!.smallHeader[event.col].hovered = true;
-                break
-            case 'leave':
-                this.hoverCorrectTreeNode(event.type, event.row)
-                this.timeFrameHeaders!.smallHeader[event.col].hovered = false;
-                break;
-            case 'click':
-                let i = 0;
-                this.treeData.forEach(t => {
+    onCellClicked(event: { row: number, col: number }) {
+        let i = 0;
+        this.treeData.forEach(t => {
+            if (i === event.row) {
+                console.log(this.eventItems.filter(i => i.childId === t.id && t.isChild));
+            }
+            i += 1;
+            if (t.children && t.showChildren) {
+                t.children?.forEach(child => {
                     if (i === event.row) {
-                        console.log(this.eventItems.filter(i => i.childId === t.id && t.isChild));
+                        console.log(this.eventItems.filter(i => i.childId === child.id && child.isChild));
                     }
                     i += 1;
-                    if (t.children && t.showChildren) {
-                        t.children?.forEach(child => {
-                            if (i === event.row) {
-                                console.log(this.eventItems.filter(i => i.childId === child.id && child.isChild));
-                            }
-                            i += 1;
-                        })
-                    }
                 })
-        }
-        this.cdr.detectChanges()
+            }
+        })
     }
 
     onAllRowsChange(event: {row: number, height: number, color: string, personId?: number}[]) {
@@ -367,11 +393,5 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
         this.calculateWidth(this.calendarContent.nativeElement.clientWidth);
         this.performAction()
 
-    }
-
-    updateScroll(scrollMain: HTMLElement, scrollHorizontal: HTMLElement, scrollVertical: HTMLElement) {
-        scrollHorizontal.scrollTop = scrollMain.scrollTop;
-        console.log(scrollMain.scrollTop)
-        scrollVertical.scrollLeft = scrollMain.scrollLeft;
     }
 }

@@ -23,7 +23,7 @@ export class GridComponent implements OnChanges {
     @Input() groups: Group[] = [];
     @Input() utc: boolean = false;
 
-    @Output() cellEvent = new EventEmitter<{type: string, row: number, col: number}>();
+    @Output() cellEvent = new EventEmitter<{row: number, col: number}>();
     @Output() allRowsChange = new EventEmitter<{row: number, height: number, color: string, childId?: number, groupId?: number}[]>();
 
     gridPositions: GridPosition[] = [];
@@ -77,9 +77,7 @@ export class GridComponent implements OnChanges {
                 rect.setAttribute('y', currentY.toString());
                 rect.setAttribute('width', columnWidth.toString());
                 rect.setAttribute('height', rowHeight.toString());
-                rect.addEventListener('click', () => this.onCellEvent('click', row, col));
-                rect.addEventListener('mouseenter', () => this.onCellEvent('hover', row, col));
-                rect.addEventListener('mouseleave', () => this.onCellEvent('leave', row, col));
+                rect.addEventListener('click', () => this.onCellEvent(row, col));
                 rect.setAttribute('fill', color);
                 rect.setAttribute('stroke', 'gray'); // todo: custom theming
                 rect.setAttribute('stroke-width', '0.5');
@@ -418,7 +416,7 @@ export class GridComponent implements OnChanges {
         return {childId: this.allRows[heightArray.length - 1].childId, height: heightArray[heightArray.length - 1]}
     }
 
-    onCellEvent(type: string, row: number, col: number) {
-        this.cellEvent.emit({ type: type, row: row, col: col });
+    onCellEvent(row: number, col: number) {
+        this.cellEvent.emit({ row: row, col: col });
     }
 }
