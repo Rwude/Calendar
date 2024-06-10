@@ -98,7 +98,6 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
             this.maxHeight = this.calendarContent.nativeElement.clientHeight + this.calendarContent.nativeElement.scrollTop;
         });
         this.maxHeight = this.calendarContent.nativeElement.clientHeight - this.calendarContent.nativeElement.scrollTop;
-        console.log(this.maxHeight)
     }
 
     ngOnDestroy() {
