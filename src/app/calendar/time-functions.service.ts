@@ -9,8 +9,8 @@ export class TimeFunctionsService {
     constructor() { }
 
     getTimeFrameLength(timeFrame: [number, EnumTime], start: number, utc: boolean, prev: boolean = false) {
-        const date = new Date(start)
-        let year = utc ? date.getUTCFullYear() : date.getFullYear();
+        const date = this.getDate(start, utc)
+        let year = this.getYear(start, utc);
         let endDate: number;
         switch (timeFrame[1]) {
             case EnumTime.Minute:
@@ -18,33 +18,29 @@ export class TimeFunctionsService {
             case EnumTime.Hour:
                 return 3600000 * timeFrame[0];
             case EnumTime.Day:
-                endDate = new Date(date).setDate(date.getDate() + timeFrame[0])
+                endDate = this.setDate(start, utc, date + timeFrame[0])
                 return endDate - start;
             case EnumTime.Week:
-                endDate = new Date(date).setDate(date.getDate() + 7 * timeFrame[0])
+                endDate = this.setDate(start, utc,date + 7 * timeFrame[0])
                 return endDate - start;
             case EnumTime.Month:
                 const nbDays = this.daysOfMonth(start, timeFrame, utc, prev);
-                endDate = prev ? new Date(date).setDate(date.getDate() - nbDays) : new Date(date).setDate(date.getDate() + nbDays);
+
+                endDate = this.setDate(start, utc, prev ? date - nbDays : date + nbDays)
                 return endDate - start;
             case EnumTime.Year:
-                if (utc) {
-                    endDate = prev ? new Date(date).setUTCFullYear(year - timeFrame[0]) : new Date(date).setUTCFullYear(year + timeFrame[0])
-                } else {
-                    endDate = prev ? new Date(date).setFullYear(year - timeFrame[0]) : new Date(date).setFullYear(year + timeFrame[0])
-                }
+                endDate = this.setYear(start, utc, prev ? year - timeFrame[0] : year + timeFrame[0]);
                 return endDate - start;
         }
     }
 
     daysOfMonth(start: number, timeFrame: [number, EnumTime], utc: boolean, prev: boolean = false) {
-        const date = new Date(start)
-        let year = utc ? date.getUTCFullYear() : date.getFullYear();
-        let month = utc ? date.getUTCMonth() : date.getMonth();
+        let year = this.getYear(start, utc);
+        let month = this.getMonth(start, utc);
         let nbDays = 0;
         if (prev) month -= timeFrame[0];
         for (let idx = 0; idx < timeFrame[0]; idx += 1) {
-            nbDays += new Date(year, month + 1, 0).getDate();
+            nbDays += this.getDate(new Date(year, month + 1, 0).getTime(), utc);
             if (month < 12) {
                 month += 1;
             } else {
@@ -57,17 +53,11 @@ export class TimeFunctionsService {
     }
 
     getNumberOfMinutes(timeFrame: [number, EnumTime], start: number, utc: boolean) {
-        const startDate = new Date(start);
-        const year = utc ? startDate.getUTCFullYear() : startDate.getFullYear();
+        const year = this.getYear(start, utc);
         let days: number;
         switch (timeFrame[1]) {
             case EnumTime.Year:
-                let endDate: number;
-                if (utc) {
-                    endDate = new Date(start).setUTCFullYear(year + timeFrame[0])
-                } else {
-                    endDate = new Date(start).setFullYear(year + timeFrame[0])
-                }
+                const endDate = this.setYear(start, utc, year + timeFrame[0]);
                 days = (endDate - start) / 86400000;
                 break;
             case EnumTime.Month:
@@ -84,7 +74,7 @@ export class TimeFunctionsService {
             case EnumTime.Minute:
                 return timeFrame[0]
         }
-        const endDate = new Date(startDate).setDate(startDate.getDate() + days)
+        const endDate = this.setDate(start, utc, this.getDate(start, utc) + days)
         return (endDate - start) / 60000;
     }
 
@@ -101,6 +91,70 @@ export class TimeFunctionsService {
             case EnumTime.Minute:
                 return 60000;
         }
+    }
+
+    setStart(start: number, startPoint: EnumTime, utc: boolean) {
+        switch (startPoint) {
+            case EnumTime.Year:
+                return this.setMonth(start, utc, 0);
+            case EnumTime.Month:
+                return this.setDate(start, utc, 1);
+            case EnumTime.Day:
+                return this.setHour(start, utc, 0);
+            case EnumTime.Week:
+                const dayOfWeek = this.getDay(start, utc);
+                const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                return this.setDate(start, utc, this.getDate(start, utc) - daysToSubtract);
+            default:
+                return this.setMinute(start, utc, 0);
+        }
+    }
+
+    getYear(time: number, utc: boolean) {
+        return  utc ? new Date(time).getUTCFullYear() : new Date(time).getFullYear();
+    }
+
+    getMonth(time: number, utc: boolean) {
+        return  utc ? new Date(time).getUTCMonth() : new Date(time).getMonth();
+    }
+
+    getDate(time: number, utc: boolean) {
+        return utc ? new Date(time).getUTCDate() : new Date(time).getDate();
+    }
+
+    getDay(time: number, utc: boolean) {
+        return utc ? new Date(time).getUTCDay() : new Date(time).getDay();
+    }
+
+    getHour(time: number, utc: boolean) {
+        return utc ? new Date(time).getUTCHours() : new Date(time).getHours();
+    }
+
+    getMinute(time: number, utc: boolean) {
+        return utc ? new Date(time).getUTCMinutes() : new Date(time).getMinutes();
+    }
+
+    setYear(time: number, utc: boolean, value: number) {
+        const date = utc ? new Date(time).setUTCFullYear(value, 0, 1) : new Date(time).setFullYear(value, 0, 1);
+        return  this.setHour(date, utc, 0);
+    }
+
+    setMonth(time: number, utc: boolean, value: number) {
+        const date = utc ? new Date(time).setUTCMonth(value, 1) : new Date(time).setMonth(value, 1);
+        return  this.setHour(date, utc, 0);
+    }
+
+    setDate(time: number, utc: boolean, value: number) {
+        const date = utc ? new Date(time).setUTCDate(value) : new Date(time).setDate(value);
+        return this.setHour(date, utc, 0);
+    }
+
+    setHour(time: number, utc: boolean, value: number) {
+        return utc ? new Date(time).setUTCHours(value, 0, 0, 0) : new Date(time).setHours(value, 0, 0, 0);
+    }
+
+    setMinute(time: number, utc: boolean, value: number) {
+        return utc ? new Date(time).setUTCMinutes(value) : new Date(time).setMinutes(value);
     }
 
     getMinutes(timeFrame: number) {

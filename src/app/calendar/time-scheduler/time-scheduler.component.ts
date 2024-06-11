@@ -66,7 +66,7 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
 
     ngOnInit() {
         this.currentPeriod = this.periods[0];
-        this.start = this.currentPeriod.start;
+        this.start = this.timeFunctions.setStart(new Date().getTime(), this.currentPeriod.startPoint!, this.utc);
         this.startAndEnd = {start: this.start!, end: this.start! + this.timeFunctions.getTimeFrameLength(this.currentPeriod.timeFrame, this.start!, this.utc)}
         this.treeData = this.getTreeData();
         this.numberRows = this.getVisibleTreeData();
@@ -342,7 +342,7 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
 
     changePeriod(event: {periodIdx: number}) {
         this.currentPeriod = this.periods[event.periodIdx];
-        this.start = this.currentPeriod.start;
+        this.start = this.timeFunctions.setStart(this.start!, this.currentPeriod.startPoint!, this.utc);
         this.startAndEnd = {start: this.start!, end: this.start! + this.timeFunctions.getTimeFrameLength(this.currentPeriod!.timeFrame, this.start!, this.utc)};
         this.timeFrameHeaders = this.getTimeFrameHeaders(this.currentPeriod);
         this.calculateWidth(this.calendarContent.nativeElement.clientWidth);

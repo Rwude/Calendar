@@ -2,7 +2,7 @@ export interface Period {
   name: string;
   classes?: string;
   timeFrame: [number, EnumTime];
-  start?: number;
+  startPoint?: EnumTime;
   headerClickable: boolean;
   timeFramePeriod: [number, EnumTime];
   width?: number;

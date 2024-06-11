@@ -12,7 +12,7 @@ export class AppComponent {
         {
             name: '18 Days',
             timeFrame: [18, EnumTime.Day],
-            start: new Date().setHours(0, 0, 0, 0),
+            startPoint: EnumTime.Day,
             headerClickable: true,
             timeFrameHeadersId: {bigHeader: 1, smallHeader: 0},
             timeFramePeriod: [1, EnumTime.Day]
@@ -20,7 +20,7 @@ export class AppComponent {
         {
             name: 'Month',
             timeFrame: [1, EnumTime.Month],
-            start: new Date('2024-01-01').setHours(0,0,0,0),
+            startPoint: EnumTime.Month,
             headerClickable: true,
             timeFrameHeadersId: {bigHeader: 1, smallHeader: 0},
             timeFramePeriod: [1, EnumTime.Day]
@@ -28,7 +28,7 @@ export class AppComponent {
         {
             name: 'Year',
             timeFrame: [1, EnumTime.Year],
-            start: new Date('2024-01-01').setHours(0,0,0,0),
+            startPoint: EnumTime.Year,
             width: 100,
             headerClickable: true,
             timeFrameHeadersId: {bigHeader: 1, smallHeader: 2},

@@ -37,7 +37,7 @@ export class CalendarHeaderComponent implements OnChanges, OnInit{
         if (changes['periods']) {
             this.periodIndex = 0;
             this.period = this.periods[0];
-            this.start = this.period.start || new Date().setHours(0,0,0,0);
+            this.start = this.timeFunctions.setStart(this.start!, this.period.startPoint!, this.utc);
             this.end = this.start + this.timeFunctions.getTimeFrameLength(this.period.timeFrame, this.start, this.utc) - this.timeFunctions.getMilliseconds(this.period.timeFramePeriod[1]) * this.period.timeFramePeriod[0];
             this.title = this.getTitle();
         } else if (changes['currentPeriod'] || changes['start']) {
@@ -107,10 +107,11 @@ export class CalendarHeaderComponent implements OnChanges, OnInit{
         return title
     }
 
-    switchPeriod(event: any) {
+    switchPeriod(event: { source: {}, value: number }) {
         this.periodIndex = event.value
         this.period = this.periods[this.periodIndex!];
-        this.start = this.period!.start || new Date().setHours(0,0,0,0);
+        this.start = this.timeFunctions.setStart(this.start!, this.period.startPoint!, this.utc);
+        console.log(new Date(this.start).toISOString());
         this.end = this.start + this.timeFunctions.getTimeFrameLength(this.period!.timeFrame, this.start, this.utc) - this.timeFunctions.getMilliseconds(this.period.timeFramePeriod[1]) * this.period.timeFramePeriod[0];
         this.title = this.getTitle()
 
