@@ -3,9 +3,9 @@ import {EnumTime, Period} from "../models";
 import {TimeFunctionsService} from "../time-functions.service";
 
 @Component({
-  selector: 'app-calendar-header',
-  templateUrl: './calendar-header.component.html',
-  styleUrl: './calendar-header.component.scss'
+    selector: 'app-calendar-header',
+    templateUrl: './calendar-header.component.html',
+    styleUrl: './calendar-header.component.scss'
 })
 export class CalendarHeaderComponent implements OnChanges, OnInit{
     @Input() periods!: Period[];
@@ -107,11 +107,10 @@ export class CalendarHeaderComponent implements OnChanges, OnInit{
         return title
     }
 
-    switchPeriod(event: { source: {}, value: number }) {
+    switchPeriod(event: { source: object, value: number }) {
         this.periodIndex = event.value
         this.period = this.periods[this.periodIndex!];
         this.start = this.timeFunctions.setStart(this.start!, this.period.startPoint!, this.utc);
-        console.log(new Date(this.start).toISOString());
         this.end = this.start + this.timeFunctions.getTimeFrameLength(this.period!.timeFrame, this.start, this.utc) - this.timeFunctions.getMilliseconds(this.period.timeFramePeriod[1]) * this.period.timeFramePeriod[0];
         this.title = this.getTitle()
 

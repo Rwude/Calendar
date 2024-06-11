@@ -1,13 +1,13 @@
 export interface Period {
-  name: string;
-  classes?: string;
-  timeFrame: [number, EnumTime];
-  startPoint?: EnumTime;
-  headerClickable: boolean;
-  timeFramePeriod: [number, EnumTime];
-  width?: number;
-  timeFrameHeadersId?: {bigHeader: number, smallHeader: number };
-  tooltip?: string;
+    name: string;
+    classes?: string;
+    timeFrame: [number, EnumTime];
+    startPoint?: EnumTime;
+    headerClickable: boolean;
+    timeFramePeriod: [number, EnumTime];
+    width?: number;
+    timeFrameHeadersId?: { bigHeader: number, smallHeader: number };
+    tooltip?: string;
 }
 
 export enum EnumTime {
@@ -18,7 +18,6 @@ export enum EnumTime {
     Month = 'month',
     Year = 'year'
 }
-
 
 export interface TimeFrameHeader {
     bigHeader: BigTimeFrameHeader[];
@@ -41,32 +40,32 @@ export interface SmallTimeFrameHeader {
 }
 
 export interface EventItem {
-  id: number;
-  name: string;
-  showedName: string;
-  importance?: number;
-  start: number;
-  end: number;
-  groupId?: number;
-  childId: number;
-  color?: string;
-  backgroundColor?: string;
-  dragPrecision?: [number, EnumTime];
+    id: number;
+    name: string;
+    showedName: string;
+    importance?: number;
+    start: number;
+    end: number;
+    groupId?: number;
+    childId: number;
+    color?: string;
+    backgroundColor?: string;
+    dragPrecision?: [number, EnumTime];
 }
 
 export interface Group {
-  id: number;
-  name: string;
-  tooltip?: string;
-  childIds: number[];
+    id: number;
+    name: string;
+    tooltip?: string;
+    childIds: number[];
 }
 
 export interface Child {
-  id: number;
-  name: string;
-  shortName?: string;
-  picture?: string;
-  groupId: number;
+    id: number;
+    name: string;
+    shortName?: string;
+    picture?: string;
+    groupId: number;
 }
 
 export interface TreeData {
@@ -77,7 +76,7 @@ export interface TreeData {
     id: number;
     hovered: boolean;
     height: number;
-    showChildren?: boolean
+    showChildren?: boolean;
     children?: TreeData[];
 }
 

@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {EnumTime} from "./models";
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class TimeFunctionsService {
 
@@ -10,7 +10,7 @@ export class TimeFunctionsService {
 
     getTimeFrameLength(timeFrame: [number, EnumTime], start: number, utc: boolean, prev: boolean = false) {
         const date = this.getDate(start, utc)
-        let year = this.getYear(start, utc);
+        const year = this.getYear(start, utc);
         let endDate: number;
         switch (timeFrame[1]) {
             case EnumTime.Minute:
@@ -23,11 +23,11 @@ export class TimeFunctionsService {
             case EnumTime.Week:
                 endDate = this.setDate(start, utc,date + 7 * timeFrame[0])
                 return endDate - start;
-            case EnumTime.Month:
+            case EnumTime.Month: {
                 const nbDays = this.daysOfMonth(start, timeFrame, utc, prev);
-
                 endDate = this.setDate(start, utc, prev ? date - nbDays : date + nbDays)
                 return endDate - start;
+            }
             case EnumTime.Year:
                 endDate = this.setYear(start, utc, prev ? year - timeFrame[0] : year + timeFrame[0]);
                 return endDate - start;
@@ -56,10 +56,11 @@ export class TimeFunctionsService {
         const year = this.getYear(start, utc);
         let days: number;
         switch (timeFrame[1]) {
-            case EnumTime.Year:
+            case EnumTime.Year: {
                 const endDate = this.setYear(start, utc, year + timeFrame[0]);
                 days = (endDate - start) / 86400000;
                 break;
+            }
             case EnumTime.Month:
                 days = this.daysOfMonth(start, timeFrame, utc);
                 break;
@@ -101,10 +102,11 @@ export class TimeFunctionsService {
                 return this.setDate(start, utc, 1);
             case EnumTime.Day:
                 return this.setHour(start, utc, 0);
-            case EnumTime.Week:
+            case EnumTime.Week: {
                 const dayOfWeek = this.getDay(start, utc);
                 const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
                 return this.setDate(start, utc, this.getDate(start, utc) - daysToSubtract);
+            }
             default:
                 return this.setMinute(start, utc, 0);
         }

@@ -19,9 +19,9 @@ import {
 import {TimeFunctionsService} from "../time-functions.service";
 
 @Component({
-  selector: 'cern-time-scheduler',
-  templateUrl: './time-scheduler.component.html',
-  styleUrls: ['./time-scheduler.component.scss']
+    selector: 'cern-time-scheduler',
+    templateUrl: './time-scheduler.component.html',
+    styleUrls: ['./time-scheduler.component.scss']
 })
 export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     @ViewChild('calendarContent') calendarContent!: ElementRef<HTMLDivElement>;
@@ -53,15 +53,15 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     startAndEnd: {start: number, end: number} = {start: 0, end: 0};
 
     private resizeObserver!: ResizeObserver;
-    private intervalId: any;
 
     treeData: TreeData[]  = [];
+    intervalId: any;
 
 
     constructor(
         private cdr: ChangeDetectorRef,
         private timeFunctions: TimeFunctionsService
-        ) {
+    ) {
     }
 
     ngOnInit() {
@@ -93,13 +93,8 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
         this.setupResizeObserver();
         this.calculateWidth(this.calendarContent.nativeElement.clientWidth);
         this.calendarContent.nativeElement.addEventListener('scroll', () => {
-            this.hoverCorrectTreeNode();
+            this.hoverCorrectTreeNode()
             this.scrollHorizontal.nativeElement.scrollTop = this.calendarContent.nativeElement.scrollTop;
-            this.calendarContent.nativeElement.scrollTop = this.scrollHorizontal.nativeElement.scrollTop;
-            this.maxHeight = this.calendarContent.nativeElement.clientHeight + this.calendarContent.nativeElement.scrollTop;
-        });
-        this.scrollHorizontal.nativeElement.addEventListener('scroll', () => {
-            this.hoverCorrectTreeNode();
             this.calendarContent.nativeElement.scrollTop = this.scrollHorizontal.nativeElement.scrollTop;
             this.maxHeight = this.calendarContent.nativeElement.clientHeight + this.calendarContent.nativeElement.scrollTop;
         });
@@ -131,7 +126,7 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     getTreeData() {
         const treeData: TreeData[] = [];
         this.groups.forEach(g => {
-            let children: TreeData[] = [];
+            const children: TreeData[] = [];
             g.childIds.forEach(id => {
                 const person = this.persons.find(p => p.id === id)
                 children.push({name: person!.name, isChild: true, shortName: person!.shortName, id: person!.id, hovered: false, height: 40})
@@ -164,8 +159,8 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
             rowsData.push({row: idx, color: color, height: t.height, childId: childId, groupId: sectionId});
             if (t.children && t.showChildren) {
                 t.children.forEach(c => {
-                    const color = c.isChild ? 'white' : 'lightgrey'; // todo: custom theming
-                    rowsData.push({row: idx, color: color, height: c.height, childId: c.id});
+                    const colorChild = c.isChild ? 'white' : 'lightgrey'; // todo: custom theming
+                    rowsData.push({row: idx, color: colorChild, height: c.height, childId: c.id});
                 })
             }
         });
@@ -173,7 +168,7 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     }
     setupResizeObserver() {
         this.resizeObserver = new ResizeObserver(entries => {
-            for (let entry of entries) {
+            for (const entry of entries) {
                 if (entry.contentRect) {
                     const newWidth = entry.contentRect.width;
                     this.onContainerResize(newWidth);
@@ -243,14 +238,15 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
     }
 
     getTimeInfo(time: number, bigHeaderFormat: [number, EnumTime], smallHeaderFormat: EnumTime): {bigHeaderInfo: string | undefined, smallHeaderInfo: string} {
-        let currentTimeSplit: any[];
-        const timeDate = new Date(time);
-        if (this.utc) {
-            currentTimeSplit = [timeDate.getUTCFullYear(), timeDate.getUTCMonth(), timeDate.getUTCDate(), timeDate.getUTCHours(), timeDate.getUTCMinutes().toString().padStart(2, '0')];
-        } else {
-            currentTimeSplit = [timeDate.getFullYear(), timeDate.getMonth(), timeDate.getDate(), timeDate.getHours(), timeDate.getMinutes().toString().padStart(2, '0')];
-        }
-        const day = this.utc? this.dayShort[timeDate.getUTCDay()] : this.dayShort[timeDate.getDay()];
+        const currentTimeSplit: string[] = [
+            this.timeFunctions.getYear(time, this.utc).toString(),
+            this.timeFunctions.getMonth(time, this.utc).toString(),
+            this.timeFunctions.getDate(time, this.utc).toString(),
+            this.timeFunctions.getHour(time, this.utc).toString().padStart(2, '0'),
+            this.timeFunctions.getMinute(time, this.utc).toString().padStart(2, '0')
+        ];
+
+        const day = this.dayShort[this.timeFunctions.getDay(time, this.utc)];
         let bigHeaderInfo: string | undefined;
         let smallHeaderInfo: string;
         switch(bigHeaderFormat[1]) {
@@ -258,16 +254,16 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
                 bigHeaderInfo = undefined;
                 break;
             case EnumTime.Day:
-                bigHeaderInfo = bigHeaderFormat[0] > 1 ? this.monthShort[currentTimeSplit[1]] : undefined;
+                bigHeaderInfo = bigHeaderFormat[0] > 1 ? this.monthShort[Number(currentTimeSplit[1])] : undefined;
                 break;
             case EnumTime.Week:
-                bigHeaderInfo = this.monthShort[currentTimeSplit[1]];
+                bigHeaderInfo = this.monthShort[Number(currentTimeSplit[1])];
                 break;
             case EnumTime.Month:
                 bigHeaderInfo = undefined;
                 break;
             case EnumTime.Year:
-                bigHeaderInfo = this.monthShort[currentTimeSplit[1]];
+                bigHeaderInfo = this.monthShort[Number(currentTimeSplit[1])];
         }
         switch (smallHeaderFormat) {
             case EnumTime.Week:
@@ -358,13 +354,13 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
         let i = 0;
         this.treeData.forEach(t => {
             if (i === event.row) {
-                console.log(this.eventItems.filter(i => i.childId === t.id && t.isChild));
+                console.log(this.eventItems.filter(item => item.childId === t.id && t.isChild));
             }
             i += 1;
             if (t.children && t.showChildren) {
                 t.children?.forEach(child => {
                     if (i === event.row) {
-                        console.log(this.eventItems.filter(i => i.childId === child.id && child.isChild));
+                        console.log(this.eventItems.filter(item => item.childId === child.id && child.isChild));
                     }
                     i += 1;
                 })
