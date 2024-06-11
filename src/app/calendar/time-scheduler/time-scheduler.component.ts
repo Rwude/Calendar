@@ -93,8 +93,13 @@ export class TimeSchedulerComponent implements OnInit, AfterViewInit, OnDestroy{
         this.setupResizeObserver();
         this.calculateWidth(this.calendarContent.nativeElement.clientWidth);
         this.calendarContent.nativeElement.addEventListener('scroll', () => {
-            this.hoverCorrectTreeNode()
+            this.hoverCorrectTreeNode();
             this.scrollHorizontal.nativeElement.scrollTop = this.calendarContent.nativeElement.scrollTop;
+            this.calendarContent.nativeElement.scrollTop = this.scrollHorizontal.nativeElement.scrollTop;
+            this.maxHeight = this.calendarContent.nativeElement.clientHeight + this.calendarContent.nativeElement.scrollTop;
+        });
+        this.scrollHorizontal.nativeElement.addEventListener('scroll', () => {
+            this.hoverCorrectTreeNode();
             this.calendarContent.nativeElement.scrollTop = this.scrollHorizontal.nativeElement.scrollTop;
             this.maxHeight = this.calendarContent.nativeElement.clientHeight + this.calendarContent.nativeElement.scrollTop;
         });
